@@ -1,3 +1,5 @@
+curl -sL https://raw.githubusercontent.com/tarasov2783-ux/HAPP-Generator/main/install.sh | bash
+
 # HAPP Python port
 
 Python/FastAPI-версия вашего Node.js сервиса с сохранением основной логики и отдельной Python-библиотекой для генерации `happ://crypt...` ссылок.
