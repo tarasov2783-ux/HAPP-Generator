@@ -20,17 +20,59 @@
       --bad-bg: rgba(220, 38, 38, 0.15);
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
       --sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --cyan: #17d5e8;
     }
     * { box-sizing: border-box; }
     body { margin: 0; font-family: var(--sans); background: var(--bg); color: var(--text); }
     .wrap { max-width: 1480px; margin: 0 auto; padding: 24px; }
     h1,h2,h3 { margin: 0; }
-    .topbar { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:20px; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:20px; flex-wrap: wrap; }
     .subtitle,.hint,.muted { color: var(--muted); font-size: 14px; }
     .actions { display:flex; gap:10px; flex-wrap:wrap; }
     button { border:1px solid var(--line); background:var(--panel-2); color:var(--text); padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; transition: all 0.2s; }
     button:hover { background:#21314f; }
     .btn-danger { border-color: rgba(220,38,38,.35); background: rgba(220,38,38,.12); color:#fecaca; }
+    .btn-primary { background: linear-gradient(135deg, var(--cyan), #0fc3dd); color: #04111d; border: none; }
+    
+    /* Вкладки */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .tab-btn {
+      background: transparent;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 30px;
+      cursor: pointer;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 15px;
+    }
+    
+    .tab-btn:hover {
+      background: var(--panel-2);
+      color: var(--text);
+    }
+    
+    .tab-btn.active {
+      background: var(--panel-2);
+      color: var(--cyan);
+      border: 1px solid rgba(23,213,232,.3);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
     
     /* Поиск */
     .search-bar {
@@ -52,7 +94,7 @@
     
     .search-input:focus {
       outline: none;
-      border-color: #17d5e8;
+      border-color: var(--cyan);
     }
     
     .search-input::placeholder {
@@ -82,17 +124,18 @@
     
     .layout { display:grid; grid-template-columns:360px 1fr; gap:18px; align-items:start; }
     .panel { overflow:hidden; }
-    .panel-head { padding:16px 18px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    .panel-head { padding:16px 18px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap: wrap; }
     .panel-body { padding:16px 18px; }
     .violators-list,.groups-list,.links-list,.usage-list { display:grid; gap:12px; }
     .violator-card,.group-card,.link-card { background:var(--panel-2); border:1px solid var(--line); border-radius:14px; padding:14px; }
     .violator-card { border-color: rgba(220,38,38,.35); background: rgba(220,38,38,.08); }
-    .group-head,.link-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin-bottom:12px; }
+    .group-head,.link-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin-bottom:12px; flex-wrap: wrap; }
     .group-title,.link-title { display:flex; flex-direction:column; gap:6px; min-width:0; }
     .mono { font-family:var(--mono); word-break:break-all; color:#c9d8f6; font-size:13px; }
     .pill { display:inline-flex; align-items:center; border-radius:999px; padding:6px 10px; font-size:12px; font-weight:700; background:rgba(31,157,85,.12); color:#bbf7d0; border:1px solid rgba(31,157,85,.3); white-space:nowrap; }
     .pill-warning { background:rgba(240,179,90,.12); color:#ffe4b0; border-color:rgba(240,179,90,.3); }
     .pill-danger { background:rgba(220,38,38,.12); color:#fecaca; border-color:rgba(220,38,38,.35); }
+    .pill-cyan { background:rgba(23,213,232,.12); color:#8ff7ff; border-color:rgba(23,213,232,.3); }
     
     /* Компактная метрика */
     .metrics-row {
@@ -138,7 +181,7 @@
     .spoiler-btn {
       background: transparent;
       border: 1px solid var(--line);
-      color: #17d5e8;
+      color: var(--cyan);
       cursor: pointer;
       font-size: 13px;
       padding: 6px 16px;
@@ -149,7 +192,7 @@
     
     .spoiler-btn:hover {
       background: rgba(23,213,232,0.1);
-      border-color: #17d5e8;
+      border-color: var(--cyan);
     }
     
     .facts { display:grid; grid-template-columns:repeat(6,minmax(90px,1fr)); gap:10px; margin-bottom:12px; }
@@ -175,11 +218,55 @@
     .section-gap { margin-top:18px; }
     .hidden { display: none !important; }
 
+    /* Форма создания клиента */
+    .form-group {
+      margin-bottom: 18px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      color: var(--text);
+      font-size: 14px;
+    }
+    
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--cyan);
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    
+    .code-block {
+      background: var(--panel);
+      padding: 12px;
+      border-radius: 12px;
+      word-break: break-all;
+      font-family: var(--mono);
+      font-size: 13px;
+      margin: 12px 0;
+    }
+
     @media (max-width:1200px) {
       .layout { grid-template-columns:1fr; }
       .grid-stats { grid-template-columns:repeat(3,minmax(140px,1fr)); }
       .facts { grid-template-columns:repeat(3,minmax(120px,1fr)); }
       .metrics-row { gap: 10px; }
+      .form-row { grid-template-columns: 1fr; }
     }
     @media (max-width:720px) {
       .wrap { padding:14px; }
@@ -202,7 +289,15 @@
       </div>
     </div>
 
-    <div class="grid-stats">
+    <!-- Вкладки -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="groups">📊 Группы</button>
+      <button class="tab-btn" data-tab="servers">🖥️ Серверы 3x-UI</button>
+      <button class="tab-btn" data-tab="create">✨ Создать ключ</button>
+    </div>
+
+    <!-- Статистика -->
+    <div class="grid-stats" id="statsPanel">
       <div class="stat"><div class="label">Групп</div><div class="value" id="statGroups">0</div></div>
       <div class="stat"><div class="label">Ссылок</div><div class="value" id="statLinks">0</div></div>
       <div class="stat"><div class="label">Активаций выпущено</div><div class="value" id="statIssued">0</div></div>
@@ -211,34 +306,133 @@
       <div class="stat"><div class="label">Групп с наруш.</div><div class="value" id="statViolators">0</div></div>
     </div>
 
-    <!-- Поиск -->
-    <div class="search-bar">
+    <!-- Поиск (только для групп) -->
+    <div class="search-bar" id="searchBar">
       <input type="text" class="search-input" id="searchInput" placeholder="Поиск по никнейму или URL..." />
       <div class="search-stats" id="searchStats">Найдено: 0</div>
     </div>
 
-    <div class="layout">
-      <div class="panel">
-        <div class="panel-head">
-          <div>
-            <h2>Нарушители</h2>
-            <div class="hint">Группы, где есть нарушения</div>
+    <!-- Вкладка: Группы -->
+    <div id="groupsTab" class="tab-content active">
+      <div class="layout">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Нарушители</h2>
+              <div class="hint">Группы, где есть нарушения</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div id="violatorsList" class="violators-list"></div>
           </div>
         </div>
-        <div class="panel-body">
-          <div id="violatorsList" class="violators-list"></div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Группы</h2>
+              <div class="hint">Одна группа = одна исходная ссылка подписки.</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div id="groupsList" class="groups-list"></div>
+          </div>
         </div>
       </div>
+    </div>
 
+    <!-- Вкладка: Серверы -->
+    <div id="serversTab" class="tab-content">
       <div class="panel">
         <div class="panel-head">
           <div>
-            <h2>Группы</h2>
-            <div class="hint">Одна группа = одна исходная ссылка подписки.</div>
+            <h2>🖥️ Серверы 3x-UI</h2>
+            <div class="hint">Управление серверами и inbound'ами</div>
+          </div>
+          <button id="refreshServersBtn" class="btn-primary">🔄 Обновить</button>
+        </div>
+        <div class="panel-body">
+          <div id="serversList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Вкладка: Создание ключа -->
+    <div id="createTab" class="tab-content">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>✨ Создать нового клиента</h2>
+            <div class="hint">Создайте клиента на сервере 3x-UI и получите готовую HAPP ссылку</div>
           </div>
         </div>
         <div class="panel-body">
-          <div id="groupsList" class="groups-list"></div>
+          <form id="createClientForm">
+            <div class="form-group">
+              <label>🌐 Сервер</label>
+              <select id="createServerId" required>
+                <option value="">Выберите сервер</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>📡 Inbound</label>
+              <select id="createInboundId" required>
+                <option value="">Сначала выберите сервер</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>📧 Email пользователя</label>
+              <input type="email" id="createEmail" required placeholder="user@example.com">
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label>📊 Трафик в месяц (GB)</label>
+                <input type="number" id="createTrafficGB" value="100" min="1" max="10000">
+              </div>
+              
+              <div class="form-group">
+                <label>📅 Срок действия (дней)</label>
+                <input type="number" id="createExpiryDays" value="30" min="1" max="365">
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label>🔐 Лимит активаций HAPP</label>
+              <input type="number" id="createMaxActivations" value="1" min="1" max="100">
+              <div class="hint" style="margin-top: 5px;">Сколько устройств смогут активировать эту подписку</div>
+            </div>
+            
+            <button type="submit" class="btn-primary" style="width: 100%; padding: 14px;">🚀 Создать клиента и HAPP ссылку</button>
+          </form>
+          
+          <div id="createResult" style="margin-top: 24px; display: none;">
+            <div class="panel" style="background: var(--ok-bg); border-color: rgba(31,157,85,.3);">
+              <div class="panel-head">
+                <h3 style="color: #bbf7d0;">✅ Клиент успешно создан!</h3>
+              </div>
+              <div class="panel-body">
+                <div class="form-group">
+                  <label>🔗 HAPP ссылка для пользователя:</label>
+                  <div class="code-block" id="resultHappLink"></div>
+                </div>
+                <div class="form-group">
+                  <label>🔗 Subscription URL:</label>
+                  <div class="code-block" id="resultSubUrl" style="font-size: 12px;"></div>
+                </div>
+                <div class="form-group">
+                  <label>📋 Информация о клиенте:</label>
+                  <div class="code-block" id="resultClientInfo"></div>
+                </div>
+                <div class="actions">
+                  <button id="copyResultLink" class="btn-light">📋 Копировать HAPP ссылку</button>
+                  <a id="openResultLink" class="btn-primary" href="#" target="_blank">🔗 Открыть страницу активации</a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -302,6 +496,29 @@
       }
 
       return data;
+    }
+
+    async function copyText(text, button, okText) {
+      const oldText = button.textContent;
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+        }
+        button.textContent = okText;
+        setTimeout(() => { button.textContent = oldText; }, 1200);
+      } catch (e) {
+        alert('Не удалось скопировать');
+      }
     }
 
     function isGroupViolator(group) {
@@ -429,7 +646,7 @@
 
       return `
         <div class="usage-item ${isViolation ? 'violation' : ''}">
-          <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;">
             <div>
               <div><strong>#${index + 1}</strong> ${isViolation ? '<span class="pill pill-danger">foreign</span>' : '<span class="pill">same</span>'}</div>
               <div class="hint" style="margin-top:6px;">${esc(formatDate(usage?.at))}</div>
@@ -609,7 +826,6 @@
 
     function filterGroups(groups, searchTerm) {
       if (!searchTerm) return groups;
-      
       const term = searchTerm.toLowerCase();
       return groups.filter(group => {
         if (group.username && group.username.toLowerCase().includes(term)) return true;
@@ -621,7 +837,6 @@
     function renderGroups(groups) {
       const searchTerm = els.searchInput.value;
       const filteredGroups = filterGroups(groups, searchTerm);
-      
       els.searchStats.textContent = `Найдено: ${filteredGroups.length} из ${groups.length}`;
 
       if (!filteredGroups.length) {
@@ -633,7 +848,6 @@
         const av = isGroupViolator(a) ? 1 : 0;
         const bv = isGroupViolator(b) ? 1 : 0;
         if (av !== bv) return bv - av;
-
         const ad = new Date(a?.lastUsedAt || 0).getTime();
         const bd = new Date(b?.lastUsedAt || 0).getTime();
         return bd - ad;
@@ -657,6 +871,158 @@
         els.refreshBtn.disabled = false;
       }
     }
+
+    // ========== Управление серверами ==========
+    async function loadServers() {
+      try {
+        const data = await api('/happ/api/servers');
+        const serversList = document.getElementById('serversList');
+        
+        if (!data.servers || data.servers.length === 0) {
+          serversList.innerHTML = `<div class="empty">Нет настроенных серверов. Добавьте серверы в servers_config.json</div>`;
+          return;
+        }
+        
+        serversList.innerHTML = data.servers.map(server => `
+          <div class="group-card" style="margin-bottom: 16px;">
+            <div class="group-head">
+              <div>
+                <strong style="font-size: 18px;">${esc(server.name)}</strong>
+                <div class="mono" style="margin-top: 4px;">${esc(server.address)}</div>
+              </div>
+              <div><span class="pill pill-cyan">ID: ${esc(server.id)}</span></div>
+            </div>
+            <div class="facts" style="margin-top: 12px;">
+              <div class="fact fact-good">
+                <div class="k">Inbound'ов</div>
+                <div class="v">${server.inbounds.length}</div>
+              </div>
+              <div class="fact fact-good">
+                <div class="k">Трафик по умолч.</div>
+                <div class="v">${server.defaultTrafficGB} GB</div>
+              </div>
+              <div class="fact fact-good">
+                <div class="k">Срок по умолч.</div>
+                <div class="v">${server.defaultExpiryDays} дн.</div>
+              </div>
+            </div>
+            <div class="links-list" style="margin-top: 12px;">
+              <div class="link-card">
+                <div class="link-head">
+                  <div><strong>📡 Доступные inbound'ы</strong></div>
+                </div>
+                ${server.inbounds.map(inbound => `
+                  <div class="metrics-row" style="margin: 8px 0;">
+                    <div class="metric-item">
+                      <span class="metric-label">ID: ${inbound.id}</span>
+                    </div>
+                    <div class="metric-item">
+                      <span class="metric-label">${esc(inbound.name)}</span>
+                    </div>
+                    <div class="metric-item">
+                      <span class="metric-label">${inbound.protocol}</span>
+                    </div>
+                    <div class="metric-item">
+                      <span class="metric-label">Порт: ${inbound.port}</span>
+                    </div>
+                    ${inbound.default ? '<span class="pill pill-cyan">⭐ По умолчанию</span>' : ''}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error('Failed to load servers:', e);
+        document.getElementById('serversList').innerHTML = `<div class="empty">Ошибка загрузки: ${esc(e.message)}</div>`;
+      }
+    }
+
+    // Загрузка выбора сервера для создания
+    async function loadServerSelect() {
+      try {
+        const data = await api('/happ/api/servers');
+        const serverSelect = document.getElementById('createServerId');
+        const inboundSelect = document.getElementById('createInboundId');
+        
+        serverSelect.innerHTML = '<option value="">Выберите сервер</option>' + 
+          data.servers.map(server => `<option value="${server.id}">${esc(server.name)}</option>`).join('');
+        
+        serverSelect.onchange = () => {
+          const server = data.servers.find(s => s.id === serverSelect.value);
+          if (server) {
+            inboundSelect.innerHTML = '<option value="">Выберите inbound</option>' + 
+              server.inbounds.map(inbound => `<option value="${inbound.id}" ${inbound.default ? 'selected' : ''}>${esc(inbound.name)} (${inbound.protocol}:${inbound.port})</option>`).join('');
+            
+            document.getElementById('createTrafficGB').value = server.defaultTrafficGB;
+            document.getElementById('createExpiryDays').value = server.defaultExpiryDays;
+          }
+        };
+      } catch (e) {
+        console.error('Failed to load servers:', e);
+      }
+    }
+
+    // Создание клиента
+    document.getElementById('createClientForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Создание...';
+      
+      const data = {
+        serverId: document.getElementById('createServerId').value,
+        inboundId: parseInt(document.getElementById('createInboundId').value),
+        email: document.getElementById('createEmail').value,
+        trafficGB: parseInt(document.getElementById('createTrafficGB').value),
+        expiryDays: parseInt(document.getElementById('createExpiryDays').value),
+        maxActivations: parseInt(document.getElementById('createMaxActivations').value)
+      };
+      
+      try {
+        const result = await api('/happ/api/create-client', {
+          method: 'POST',
+          body: JSON.stringify(data)
+        });
+        
+        if (result.ok) {
+          const resultDiv = document.getElementById('createResult');
+          const resultHappLink = document.getElementById('resultHappLink');
+          const resultSubUrl = document.getElementById('resultSubUrl');
+          const resultClientInfo = document.getElementById('resultClientInfo');
+          const openResultLink = document.getElementById('openResultLink');
+          
+          resultHappLink.textContent = result.happLink;
+          resultSubUrl.textContent = result.subscriptionUrl;
+          resultClientInfo.textContent = JSON.stringify(result.client, null, 2);
+          openResultLink.href = result.onceLink;
+          resultDiv.style.display = 'block';
+          
+          // Копирование ссылки
+          document.getElementById('copyResultLink').onclick = () => {
+            copyText(result.happLink, document.getElementById('copyResultLink'), '✅ Скопировано!');
+          };
+          
+          // Обновляем списки
+          loadServers();
+          if (document.querySelector('.tab-btn.active')?.dataset.tab === 'groups') {
+            loadData();
+          }
+          
+          // Очищаем форму
+          document.getElementById('createEmail').value = '';
+        } else {
+          alert('Ошибка: ' + (result.error || 'Неизвестная ошибка'));
+        }
+      } catch (e) {
+        alert('Ошибка: ' + e.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    });
 
     function handleSearch() {
       if (searchTimeout) clearTimeout(searchTimeout);
@@ -700,6 +1066,40 @@
       }
     }
 
+    // Управление вкладками
+    const tabs = document.querySelectorAll('.tab-btn');
+    
+    function showTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      if (tabName === 'groups') {
+        document.getElementById('groupsTab').classList.add('active');
+        document.querySelector('.grid-stats').style.display = 'grid';
+        document.getElementById('searchBar').style.display = 'flex';
+      } else if (tabName === 'servers') {
+        document.getElementById('serversTab').classList.add('active');
+        document.querySelector('.grid-stats').style.display = 'none';
+        document.getElementById('searchBar').style.display = 'none';
+        loadServers();
+      } else if (tabName === 'create') {
+        document.getElementById('createTab').classList.add('active');
+        document.querySelector('.grid-stats').style.display = 'none';
+        document.getElementById('searchBar').style.display = 'none';
+        loadServerSelect();
+      }
+    }
+    
+    tabs.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+        tabs.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        showTab(tab);
+      });
+    });
+
     window.toggleContent = toggleContent;
     window.toggleDevices = toggleDevices;
     window.deleteLink = deleteLink;
@@ -708,7 +1108,9 @@
     window.deleteViolation = deleteViolation;
 
     document.getElementById('refreshBtn').addEventListener('click', loadData);
+    document.getElementById('refreshServersBtn')?.addEventListener('click', loadServers);
     els.searchInput.addEventListener('input', handleSearch);
+    
     loadData();
   </script>
 </body>
