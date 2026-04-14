@@ -6,7 +6,7 @@
       "address": "https://your-domain.com:54321",
       "username": "admin",
       "password": "your-password",
-      "inbounds": [1, 2, 3, 5],
+      "inbounds": [1, 3, 5],
       "defaultInbound": 1,
       "defaultTrafficGB": 100,
       "defaultExpiryDays": 30
