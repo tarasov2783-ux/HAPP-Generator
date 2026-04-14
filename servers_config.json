@@ -1,0 +1,29 @@
+{
+  "servers": [
+    {
+      "id": "server1",
+      "name": "Основной сервер",
+      "address": "https://your-domain.com:54321",
+      "username": "admin",
+      "password": "your-password",
+      "inbounds": [
+        {
+          "id": 1,
+          "name": "VLESS-TCP-XTLS",
+          "protocol": "vless",
+          "port": 443,
+          "default": true
+        },
+        {
+          "id": 2,
+          "name": "VMESS-WS-TLS",
+          "protocol": "vmess",
+          "port": 8443,
+          "default": false
+        }
+      ],
+      "defaultTrafficGB": 100,
+      "defaultExpiryDays": 30
+    }
+  ]
+}
