@@ -401,6 +401,8 @@ def require_admin(credentials: HTTPBasicCredentials = Depends(security)) -> None
         raise HTTPException(status_code=401, detail="Invalid credentials", headers={"WWW-Authenticate": "Basic"})
 
 
+# ==================== ОСНОВНЫЕ МАРШРУТЫ (без префикса) ====================
+
 @app.get("/")
 async def root():
     return FileResponse(PUBLIC_DIR / "index.html")
@@ -741,16 +743,6 @@ async def api_qrcode(token: str, request: Request):
     return make_qr_response(f"{base_url}/r/{token}")
 
 
-@app.get("/happ/api/qrcode/{token}")
-async def api_qrcode_happ(token: str, request: Request):
-    db = load_db()
-    item = next((x for x in db.get("links", []) if x.get("token") == token), None)
-    if not item:
-        return JSONResponse({"ok": False, "error": "Токен не найден"}, status_code=404)
-    base_url = f"{request.url.scheme}://{request.headers.get('host')}"
-    return make_qr_response(f"{base_url}/happ/r/{token}")
-
-
 @app.get("/r/{token}")
 async def route_redeem(token: str):
     db = load_db()
@@ -763,9 +755,103 @@ async def route_redeem(token: str):
     return FileResponse(PUBLIC_DIR / "redeem.html")
 
 
+# ==================== МАРШРУТЫ С ПРЕФИКСОМ /happ ====================
+
+@app.get("/happ/")
+async def happ_root():
+    return FileResponse(PUBLIC_DIR / "index.html")
+
+
+@app.get("/happ/admin.html")
+async def happ_admin_html(_: None = Depends(require_admin)):
+    return FileResponse(PUBLIC_DIR / "admin.html")
+
+
+@app.post("/happ/api/generate")
+async def happ_api_generate(payload: GenerateRequest):
+    return await api_generate(payload)
+
+
+@app.get("/happ/api/link/{token}")
+async def happ_api_link(token: str):
+    return await api_link(token)
+
+
+@app.post("/happ/api/check-device/{token}")
+async def happ_api_check_device(token: str, request: Request):
+    return await api_check_device(token, request)
+
+
+@app.post("/happ/api/redeem-preview/{token}")
+async def happ_api_redeem_preview(token: str, request: Request):
+    return await api_redeem_preview(token, request)
+
+
+@app.post("/happ/api/redeem-confirm/{token}")
+async def happ_api_redeem_confirm(token: str, request: Request):
+    return await api_redeem_confirm(token, request)
+
+
+@app.get("/happ/api/admin/links")
+async def happ_api_admin_links(_: None = Depends(require_admin)):
+    return await api_admin_links(_)
+
+
+@app.get("/happ/api/admin/groups")
+async def happ_api_admin_groups(_: None = Depends(require_admin)):
+    return await api_admin_groups(_)
+
+
+@app.delete("/happ/api/admin/link/{link_id}")
+async def happ_api_admin_delete_link(link_id: str, _: None = Depends(require_admin)):
+    return await api_admin_delete_link(link_id, _)
+
+
+@app.delete("/happ/api/admin/link/{link_id}/activations/{index}")
+async def happ_api_admin_delete_activation(link_id: str, index: int, _: None = Depends(require_admin)):
+    return await api_admin_delete_activation(link_id, index, _)
+
+
+@app.delete("/happ/api/admin/link/{link_id}/violations/{index}")
+async def happ_api_admin_delete_violation(link_id: str, index: int, _: None = Depends(require_admin)):
+    return await api_admin_delete_violation(link_id, index, _)
+
+
+@app.delete("/happ/api/admin/link/{link_id}/reset")
+async def happ_api_admin_reset(link_id: str, _: None = Depends(require_admin)):
+    return await api_admin_reset(link_id, _)
+
+
+@app.get("/happ/api/qrcode/{token}")
+async def happ_api_qrcode(token: str, request: Request):
+    db = load_db()
+    item = next((x for x in db.get("links", []) if x.get("token") == token), None)
+    if not item:
+        return JSONResponse({"ok": False, "error": "Токен не найден"}, status_code=404)
+    base_url = f"{request.url.scheme}://{request.headers.get('host')}"
+    return make_qr_response(f"{base_url}/happ/r/{token}")
+
+
+@app.get("/happ/r/{token}")
+async def happ_route_redeem(token: str):
+    return await route_redeem(token)
+
+
+@app.get("/happ/static/{path:path}")
+async def happ_static(path: str):
+    file_path = PUBLIC_DIR / path
+    if file_path.exists() and file_path.is_file():
+        return FileResponse(file_path)
+    return JSONResponse({"ok": False, "error": "File not found"}, status_code=404)
+
+
+# Статические файлы для корневого пути
+app.mount("/static", StaticFiles(directory=str(PUBLIC_DIR)), name="static")
+
+# Статические файлы для /happ/static (чтобы работали ссылки на CSS/JS в HTML)
+app.mount("/happ/static", StaticFiles(directory=str(PUBLIC_DIR)), name="happ_static")
+
+
 @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 async def fallback(path: str, request: Request):
     return JSONResponse({"ok": False, "error": f"Маршрут не найден: {request.method} /{path}"}, status_code=404)
-
-
-app.mount("/static", StaticFiles(directory=str(PUBLIC_DIR)), name="static")
