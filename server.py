@@ -8,7 +8,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
-from xui_manager import XUIManager
 
 import qrcode
 from fastapi import Depends, FastAPI, HTTPException, Request
@@ -19,6 +18,14 @@ from pydantic import BaseModel
 from user_agents import parse as parse_ua
 
 from happ_crypto import create_happ_crypto_link
+
+# Импортируем менеджер для 3x-UI
+try:
+    from xui_manager import XUIManager
+    XUI_AVAILABLE = True
+except ImportError:
+    XUI_AVAILABLE = False
+    print("Warning: xui_manager not available")
 
 BASE_DIR = Path(__file__).resolve().parent
 PUBLIC_DIR = BASE_DIR / "public"
@@ -40,9 +47,26 @@ group_locks: Dict[str, threading.Lock] = {}
 request_cache: Dict[str, float] = {}
 global_lock = threading.Lock()
 
+# Инициализируем менеджер 3x-UI
+xui_manager = None
+if XUI_AVAILABLE:
+    try:
+        xui_manager = XUIManager("servers_config.json")
+    except Exception as e:
+        print(f"Warning: Could not load xui_manager: {e}")
+
 
 class GenerateRequest(BaseModel):
     subscriptionUrl: str
+    maxActivations: int = 1
+
+
+class CreateClientRequest(BaseModel):
+    serverId: str
+    inboundId: int
+    email: str
+    trafficGB: int = 100
+    expiryDays: int = 30
     maxActivations: int = 1
 
 
@@ -756,6 +780,102 @@ async def route_redeem(token: str):
     return FileResponse(PUBLIC_DIR / "redeem.html")
 
 
+# ==================== МАРШРУТЫ ДЛЯ 3x-UI ====================
+
+@app.get("/api/servers")
+async def api_get_servers(_: None = Depends(require_admin)):
+    """Получить список серверов и их inbound'ов"""
+    try:
+        config_path = BASE_DIR / "servers_config.json"
+        if not config_path.exists():
+            return JSONResponse({"ok": True, "servers": []})
+        
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = json.load(f)
+        
+        servers = []
+        for server in config.get("servers", []):
+            servers.append({
+                "id": server.get("id"),
+                "name": server.get("name"),
+                "address": server.get("address"),
+                "inbounds": server.get("inbounds", []),
+                "defaultTrafficGB": server.get("defaultTrafficGB", 100),
+                "defaultExpiryDays": server.get("defaultExpiryDays", 30)
+            })
+        
+        return {"ok": True, "servers": servers}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
+
+
+@app.post("/api/create-client")
+async def api_create_client(payload: CreateClientRequest, _: None = Depends(require_admin)):
+    """Создать клиента на сервере и сгенерировать ссылку для HAPP"""
+    if not XUI_AVAILABLE or not xui_manager:
+        return JSONResponse({"ok": False, "error": "XUI Manager not available"}, status_code=500)
+    
+    try:
+        # Создаем клиента на сервере
+        client = xui_manager.create_client(
+            server_id=payload.serverId,
+            inbound_id=payload.inboundId,
+            email=payload.email,
+            traffic_gb=payload.trafficGB,
+            expiry_days=payload.expiryDays,
+            enable=True
+        )
+        
+        # Получаем subscription URL
+        subscription_url = client.get("subscription_url", "")
+        
+        # Генерируем HAPP ссылку
+        happ_link = create_happ_crypto_link(subscription_url, "v4", True)
+        
+        # Сохраняем в базу данных
+        db = load_db()
+        username = payload.email.split('@')[0] if '@' in payload.email else payload.email
+        token = make_id(16)
+        
+        db.setdefault("links", []).append({
+            "id": make_id(10),
+            "token": token,
+            "username": username,
+            "subscriptionUrl": subscription_url,
+            "happLink": happ_link,
+            "maxActivations": payload.maxActivations,
+            "usedCount": 0,
+            "status": "active",
+            "createdAt": now_iso(),
+            "lastUsedAt": None,
+            "activations": [],
+            "violations": [],
+            "clientInfo": {
+                "serverId": payload.serverId,
+                "inboundId": payload.inboundId,
+                "clientId": client["client_id"],
+                "email": payload.email,
+                "trafficGB": payload.trafficGB,
+                "expiryDate": client["expiry_date"]
+            }
+        })
+        save_db(db)
+        
+        return {
+            "ok": True,
+            "client": client,
+            "onceLink": f"/r/{token}",
+            "happLink": happ_link,
+            "subscriptionUrl": subscription_url
+        }
+        
+    except Exception as e:
+        return JSONResponse(
+            {"ok": False, "error": str(e)},
+            status_code=500
+        )
+
+
 # ==================== МАРШРУТЫ С ПРЕФИКСОМ /happ ====================
 
 @app.get("/happ/")
@@ -838,6 +958,17 @@ async def happ_route_redeem(token: str):
     return await route_redeem(token)
 
 
+# Маршруты для 3x-UI с префиксом /happ
+@app.get("/happ/api/servers")
+async def happ_api_get_servers(_: None = Depends(require_admin)):
+    return await api_get_servers(_)
+
+
+@app.post("/happ/api/create-client")
+async def happ_api_create_client(payload: CreateClientRequest, _: None = Depends(require_admin)):
+    return await api_create_client(payload, _)
+
+
 @app.get("/happ/static/{path:path}")
 async def happ_static(path: str):
     file_path = PUBLIC_DIR / path
@@ -849,157 +980,9 @@ async def happ_static(path: str):
 # Статические файлы для корневого пути
 app.mount("/static", StaticFiles(directory=str(PUBLIC_DIR)), name="static")
 
-# Статические файлы для /happ/static (чтобы работали ссылки на CSS/JS в HTML)
+# Статические файлы для /happ/static
 app.mount("/happ/static", StaticFiles(directory=str(PUBLIC_DIR)), name="happ_static")
 
-xui_manager = XUIManager("servers_config.json")
-
-
-class CreateClientRequest(BaseModel):
-    serverId: str
-    inboundId: int
-    email: str
-    trafficGB: int = 100
-    expiryDays: int = 30
-    maxActivations: int = 1
-
-
-@app.get("/api/servers")
-async def api_get_servers(_: None = Depends(require_admin)):
-    """Получить список серверов и их inbound'ов"""
-    with open("servers_config.json", "r", encoding="utf-8") as f:
-        config = json.load(f)
-    
-    servers = []
-    for server in config["servers"]:
-        try:
-            # Пробуем получить актуальные inbound'ы
-            inbounds = xui_manager.list_inbounds(server["id"])
-        except Exception:
-            inbounds = server.get("inbounds", [])
-        
-        servers.append({
-            "id": server["id"],
-            "name": server["name"],
-            "address": server["address"],
-            "inbounds": inbounds,
-            "defaultTrafficGB": server.get("defaultTrafficGB", 100),
-            "defaultExpiryDays": server.get("defaultExpiryDays", 30)
-        })
-    
-    return {"ok": True, "servers": servers}
-
-
-@app.post("/api/create-client")
-async def api_create_client(payload: CreateClientRequest, _: None = Depends(require_admin)):
-    """Создать клиента на сервере и сгенерировать ссылку для HAPP"""
-    try:
-        # Создаем клиента на сервере
-        client = xui_manager.create_client(
-            server_id=payload.serverId,
-            inbound_id=payload.inboundId,
-            email=payload.email,
-            traffic_gb=payload.trafficGB,
-            expiry_days=payload.expiryDays,
-            enable=True
-        )
-        
-        # Получаем subscription URL (обычно это ссылка на подписку)
-        # Формируем URL для подписки 3x-ui
-        server = None
-        with open("servers_config.json", "r", encoding="utf-8") as f:
-            config = json.load(f)
-            for s in config["servers"]:
-                if s["id"] == payload.serverId:
-                    server = s
-                    break
-        
-        if server:
-            subscription_url = f"{server['address']}/subscribe/{client['client_id']}"
-        else:
-            subscription_url = client["link"]
-        
-        # Генерируем HAPP ссылку
-        from happ_crypto import create_happ_crypto_link
-        happ_link = create_happ_crypto_link(subscription_url, "v4", True)
-        
-        # Сохраняем в базу данных
-        db = load_db()
-        username = payload.email.split('@')[0] if '@' in payload.email else payload.email
-        token = make_id(16)
-        
-        db.setdefault("links", []).append({
-            "id": make_id(10),
-            "token": token,
-            "username": username,
-            "subscriptionUrl": subscription_url,
-            "happLink": happ_link,
-            "maxActivations": payload.maxActivations,
-            "usedCount": 0,
-            "status": "active",
-            "createdAt": now_iso(),
-            "lastUsedAt": None,
-            "activations": [],
-            "violations": [],
-            "clientInfo": {
-                "serverId": payload.serverId,
-                "inboundId": payload.inboundId,
-                "clientId": client["client_id"],
-                "email": payload.email,
-                "trafficGB": payload.trafficGB,
-                "expiryDate": client["expiry_date"]
-            }
-        })
-        save_db(db)
-        
-        return {
-            "ok": True,
-            "client": client,
-            "onceLink": f"/r/{token}",
-            "happLink": happ_link,
-            "subscriptionUrl": subscription_url
-        }
-        
-    except Exception as e:
-        return JSONResponse(
-            {"ok": False, "error": str(e)},
-            status_code=500
-        )
-
-
-@app.get("/api/client-status/{client_id}")
-async def api_client_status(client_id: str, _: None = Depends(require_admin)):
-    """Получить статус клиента на сервере"""
-    # Ищем клиента в базе
-    db = load_db()
-    for link in db.get("links", []):
-        client_info = link.get("clientInfo")
-        if client_info and client_info.get("clientId") == client_id:
-            try:
-                # Получаем актуальный статус с сервера
-                server_id = client_info["serverId"]
-                # Здесь можно добавить метод для получения статуса
-                # xui_manager.get_client_status(server_id, client_id)
-                return {
-                    "ok": True,
-                    "clientInfo": client_info,
-                    "linkInfo": {
-                        "token": link["token"],
-                        "usedCount": link["usedCount"],
-                        "remaining": link.get("remaining", 0),
-                        "status": link["status"]
-                    }
-                }
-            except Exception as e:
-                return JSONResponse(
-                    {"ok": False, "error": str(e)},
-                    status_code=500
-                )
-    
-    return JSONResponse(
-        {"ok": False, "error": "Client not found"},
-        status_code=404
-    )
 
 @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 async def fallback(path: str, request: Request):
