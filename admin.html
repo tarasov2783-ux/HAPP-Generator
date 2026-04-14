@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HAPP Admin</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2b;
+      --panel-2: #18233a;
+      --text: #e8eefc;
+      --muted: #9eb0d1;
+      --line: #26324d;
+      --ok: #1f9d55;
+      --warning: #f0b35a;
+      --bad: #dc2626;
+      --ok-bg: rgba(31, 157, 85, 0.15);
+      --warning-bg: rgba(240, 179, 90, 0.15);
+      --bad-bg: rgba(220, 38, 38, 0.15);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: var(--sans); background: var(--bg); color: var(--text); }
+    .wrap { max-width: 1480px; margin: 0 auto; padding: 24px; }
+    h1,h2,h3 { margin: 0; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:20px; }
+    .subtitle,.hint,.muted { color: var(--muted); font-size: 14px; }
+    .actions { display:flex; gap:10px; flex-wrap:wrap; }
+    button { border:1px solid var(--line); background:var(--panel-2); color:var(--text); padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; transition: all 0.2s; }
+    button:hover { background:#21314f; }
+    .btn-danger { border-color: rgba(220,38,38,.35); background: rgba(220,38,38,.12); color:#fecaca; }
+    
+    /* Поиск */
+    .search-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    
+    .search-input {
+      flex: 1;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-size: 14px;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: #17d5e8;
+    }
+    
+    .search-input::placeholder {
+      color: var(--muted);
+    }
+    
+    .search-stats {
+      color: var(--muted);
+      font-size: 14px;
+      background: var(--panel);
+      padding: 8px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+    }
+    
+    .grid-stats { 
+      display:grid; 
+      grid-template-columns:repeat(6,minmax(140px,1fr)); 
+      gap:14px; 
+      margin-bottom:22px; 
+    }
+    
+    .stat,.panel { background:var(--panel); border:1px solid var(--line); border-radius:16px; }
+    .stat { padding:16px; }
+    .stat .label { color:var(--muted); font-size:13px; margin-bottom:10px; }
+    .stat .value { font-size:28px; font-weight:800; line-height:1; }
+    
+    .layout { display:grid; grid-template-columns:360px 1fr; gap:18px; align-items:start; }
+    .panel { overflow:hidden; }
+    .panel-head { padding:16px 18px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    .panel-body { padding:16px 18px; }
+    .violators-list,.groups-list,.links-list,.usage-list { display:grid; gap:12px; }
+    .violator-card,.group-card,.link-card { background:var(--panel-2); border:1px solid var(--line); border-radius:14px; padding:14px; }
+    .violator-card { border-color: rgba(220,38,38,.35); background: rgba(220,38,38,.08); }
+    .group-head,.link-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin-bottom:12px; }
+    .group-title,.link-title { display:flex; flex-direction:column; gap:6px; min-width:0; }
+    .mono { font-family:var(--mono); word-break:break-all; color:#c9d8f6; font-size:13px; }
+    .pill { display:inline-flex; align-items:center; border-radius:999px; padding:6px 10px; font-size:12px; font-weight:700; background:rgba(31,157,85,.12); color:#bbf7d0; border:1px solid rgba(31,157,85,.3); white-space:nowrap; }
+    .pill-warning { background:rgba(240,179,90,.12); color:#ffe4b0; border-color:rgba(240,179,90,.3); }
+    .pill-danger { background:rgba(220,38,38,.12); color:#fecaca; border-color:rgba(220,38,38,.35); }
+    
+    /* Компактная метрика */
+    .metrics-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin: 10px 0;
+      padding: 8px 0;
+    }
+    
+    .metric-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.03);
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+    }
+    
+    .metric-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    
+    .dot-good { background: var(--ok); box-shadow: 0 0 8px rgba(31,157,85,0.5); }
+    .dot-warning { background: var(--warning); box-shadow: 0 0 8px rgba(240,179,90,0.5); }
+    .dot-bad { background: var(--bad); box-shadow: 0 0 8px rgba(220,38,38,0.5); }
+    
+    .metric-label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    
+    .metric-value {
+      font-weight: 700;
+      margin-left: 4px;
+    }
+    
+    .spoiler-btn {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: #17d5e8;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-left: auto;
+      transition: all 0.2s;
+    }
+    
+    .spoiler-btn:hover {
+      background: rgba(23,213,232,0.1);
+      border-color: #17d5e8;
+    }
+    
+    .facts { display:grid; grid-template-columns:repeat(6,minmax(90px,1fr)); gap:10px; margin-bottom:12px; }
+    .fact { background:rgba(255,255,255,.02); border:1px solid var(--line); border-radius:12px; padding:10px; transition: all 0.2s; }
+    .fact .k { color:var(--muted); font-size:12px; margin-bottom:6px; }
+    .fact .v { font-size:18px; font-weight:700; }
+
+    /* Цветовые классы для ячеек */
+    .fact-good { background: var(--ok-bg); border-color: rgba(31,157,85,.3); }
+    .fact-good .v { color: #bbf7d0; }
+    .fact-warning { background: var(--warning-bg); border-color: rgba(240,179,90,.3); }
+    .fact-warning .v { color: #ffe4b0; }
+    .fact-bad { background: var(--bad-bg); border-color: rgba(220,38,38,.35); }
+    .fact-bad .v { color: #fecaca; }
+
+    .group-actions,.link-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .link-details { margin-top:10px; display:none; }
+    .link-details.open { display:block; }
+    .usage-item { border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(255,255,255,.02); }
+    .usage-item.violation { border-color:rgba(220,38,38,.35); background:rgba(220,38,38,.08); }
+    .usage-meta { display:grid; grid-template-columns:repeat(2,minmax(220px,1fr)); gap:8px; margin-top:8px; font-size:13px; color:var(--muted); }
+    .empty { color:var(--muted); font-size:14px; padding:8px 0; }
+    .section-gap { margin-top:18px; }
+    .hidden { display: none !important; }
+
+    @media (max-width:1200px) {
+      .layout { grid-template-columns:1fr; }
+      .grid-stats { grid-template-columns:repeat(3,minmax(140px,1fr)); }
+      .facts { grid-template-columns:repeat(3,minmax(120px,1fr)); }
+      .metrics-row { gap: 10px; }
+    }
+    @media (max-width:720px) {
+      .wrap { padding:14px; }
+      .grid-stats,.facts { grid-template-columns:1fr 1fr; }
+      .usage-meta { grid-template-columns:1fr; }
+      .topbar { flex-direction:column; align-items:flex-start; }
+      .search-bar { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>HAPP Admin</h1>
+        <div class="subtitle">Активации = успешные + нарушения. Остаток считается от общего лимита.</div>
+      </div>
+      <div class="actions">
+        <button id="refreshBtn">Обновить</button>
+      </div>
+    </div>
+
+    <div class="grid-stats">
+      <div class="stat"><div class="label">Групп</div><div class="value" id="statGroups">0</div></div>
+      <div class="stat"><div class="label">Ссылок</div><div class="value" id="statLinks">0</div></div>
+      <div class="stat"><div class="label">Активаций выпущено</div><div class="value" id="statIssued">0</div></div>
+      <div class="stat"><div class="label">Активаций всего</div><div class="value" id="statActivations">0</div></div>
+      <div class="stat"><div class="label">Устройств</div><div class="value" id="statDevices">0</div></div>
+      <div class="stat"><div class="label">Групп с наруш.</div><div class="value" id="statViolators">0</div></div>
+    </div>
+
+    <!-- Поиск -->
+    <div class="search-bar">
+      <input type="text" class="search-input" id="searchInput" placeholder="Поиск по никнейму или URL..." />
+      <div class="search-stats" id="searchStats">Найдено: 0</div>
+    </div>
+
+    <div class="layout">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Нарушители</h2>
+            <div class="hint">Группы, где есть нарушения</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div id="violatorsList" class="violators-list"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Группы</h2>
+            <div class="hint">Одна группа = одна исходная ссылка подписки.</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div id="groupsList" class="groups-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const els = {
+      statGroups: document.getElementById('statGroups'),
+      statLinks: document.getElementById('statLinks'),
+      statIssued: document.getElementById('statIssued'),
+      statActivations: document.getElementById('statActivations'),
+      statDevices: document.getElementById('statDevices'),
+      statViolators: document.getElementById('statViolators'),
+      violatorsList: document.getElementById('violatorsList'),
+      groupsList: document.getElementById('groupsList'),
+      refreshBtn: document.getElementById('refreshBtn'),
+      searchInput: document.getElementById('searchInput'),
+      searchStats: document.getElementById('searchStats')
+    };
+
+    let allGroups = [];
+    let searchTimeout = null;
+
+    function esc(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function formatDate(value) {
+      if (!value) return '—';
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return value;
+      return d.toLocaleString('ru-RU');
+    }
+
+    async function api(url, options = {}) {
+      const credentials = btoa('admin:changeme123');
+
+      const res = await fetch(url, {
+        ...options,
+        headers: {
+          'Authorization': `Basic ${credentials}`,
+          'Content-Type': 'application/json',
+          ...(options.headers || {})
+        }
+      });
+
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (_) {
+        data = null;
+      }
+
+      if (!res.ok) {
+        throw new Error(data?.error || `HTTP ${res.status}`);
+      }
+
+      return data;
+    }
+
+    function isGroupViolator(group) {
+      return Number(group?.foreignDeviceCountTotal || 0) > 0 || group?.violatorLinks > 0;
+    }
+
+    function getGroupForeignCount(group) {
+      return Number(group?.foreignDeviceCountTotal ?? 0);
+    }
+
+    function getLinkForeignCount(link) {
+      return Number(link?.foreignDeviceCount ?? 0);
+    }
+
+    function getDotClass(value, type) {
+      if (type === 'foreign') {
+        if (value === 0) return 'dot-good';
+        if (value === 1) return 'dot-warning';
+        return 'dot-bad';
+      }
+      if (type === 'devices') {
+        if (value === 0) return 'dot-warning';
+        if (value === 1) return 'dot-good';
+        return 'dot-bad';
+      }
+      if (type === 'remaining') {
+        if (value > 0) return 'dot-good';
+        return 'dot-bad';
+      }
+      if (type === 'status') {
+        if (value === 'active' || value === 'ok') return 'dot-good';
+        if (value === 'used') return 'dot-warning';
+        return 'dot-bad';
+      }
+      if (type === 'limit') {
+        if (value === 0) return 'dot-warning';
+        return 'dot-good';
+      }
+      return 'dot-good';
+    }
+
+    function getFactClass(value, type) {
+      if (type === 'foreign') {
+        if (value === 0) return 'fact-good';
+        if (value === 1) return 'fact-warning';
+        return 'fact-bad';
+      }
+      if (type === 'devices') {
+        if (value === 0) return 'fact-warning';
+        if (value === 1) return 'fact-good';
+        return 'fact-bad';
+      }
+      if (type === 'status') {
+        if (value === 'active' || value === 'ok') return 'fact-good';
+        if (value === 'used') return 'fact-warning';
+        return 'fact-bad';
+      }
+      if (type === 'remaining') {
+        if (value > 0) return 'fact-good';
+        return 'fact-bad';
+      }
+      return '';
+    }
+
+    function renderStats(groups) {
+      const totalLinks = groups.reduce((s, g) => s + Number(g?.linksCount || 0), 0);
+      const totalActivations = groups.reduce((s, g) => s + Number(g?.usedCountTotal || 0), 0);
+      const totalIssued = groups.reduce((s, g) => s + Number(g?.maxActivationsTotal || 0), 0);
+      const totalDevices = groups.reduce((s, g) => s + Number(g?.uniqueDevices || 0), 0);
+      const totalViolatorGroups = groups.filter(isGroupViolator).length;
+
+      els.statGroups.textContent = String(groups.length);
+      els.statLinks.textContent = String(totalLinks);
+      els.statIssued.textContent = String(totalIssued);
+      els.statActivations.textContent = String(totalActivations);
+      els.statDevices.textContent = String(totalDevices);
+      els.statViolators.textContent = String(totalViolatorGroups);
+    }
+
+    function renderViolators(groups) {
+      const violators = groups.filter(isGroupViolator);
+
+      if (!violators.length) {
+        els.violatorsList.innerHTML = `<div class="empty">Нарушителей пока нет.</div>`;
+        return;
+      }
+
+      els.violatorsList.innerHTML = violators.map(group => `
+        <div class="violator-card">
+          <div><strong>${esc(group?.username || '—')}</strong></div>
+          <div class="mono" style="margin-top:6px;">${esc(group?.subscriptionUrl || '—')}</div>
+          <div class="section-gap">
+            Активаций всего: <strong>${Number(group?.usedCountTotal || 0)}</strong><br>
+            Устройств: <strong>${Number(group?.uniqueDevices || 0)}</strong><br>
+            Нарушений: <strong>${getGroupForeignCount(group)}</strong><br>
+            Ссылок: <strong>${Number(group?.linksCount || 0)}</strong>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function deleteActivation(linkId, index) {
+      if (!confirm('Удалить эту активацию?')) return;
+      try {
+        await api(`/happ/api/admin/link/${encodeURIComponent(linkId)}/activations/${index}`, { method: 'DELETE' });
+        await loadData();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function deleteViolation(linkId, index) {
+      if (!confirm('Удалить это нарушение?')) return;
+      try {
+        await api(`/happ/api/admin/link/${encodeURIComponent(linkId)}/violations/${index}`, { method: 'DELETE' });
+        await loadData();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    function usageItemHtml(usage, index, linkId, primaryDeviceKey, isViolation) {
+      const deviceKey = usage?.deviceKey || '';
+      const rawDeviceKey = usage?.rawDeviceKey || '';
+
+      return `
+        <div class="usage-item ${isViolation ? 'violation' : ''}">
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+            <div>
+              <div><strong>#${index + 1}</strong> ${isViolation ? '<span class="pill pill-danger">foreign</span>' : '<span class="pill">same</span>'}</div>
+              <div class="hint" style="margin-top:6px;">${esc(formatDate(usage?.at))}</div>
+            </div>
+            <div>
+              <button class="btn-danger" onclick="${isViolation ? `deleteViolation('${linkId}', ${index})` : `deleteActivation('${linkId}', ${index})`}">Удалить устройство</button>
+            </div>
+          </div>
+
+          <div class="usage-meta">
+            <div><strong>IP:</strong> ${esc(usage?.ip || '—')}</div>
+            <div><strong>Client ID:</strong> ${esc(usage?.clientId || '—')}</div>
+            <div><strong>Browser:</strong> ${esc(usage?.browser || '—')}</div>
+            <div><strong>OS:</strong> ${esc(usage?.os || '—')}</div>
+            <div><strong>Device:</strong> ${esc([usage?.deviceType, usage?.deviceVendor, usage?.deviceModel].filter(Boolean).join(' ') || '—')}</div>
+            <div><strong>Screen:</strong> ${esc(usage?.screen || '—')}</div>
+            <div><strong>Platform:</strong> ${esc(usage?.platform || '—')}</div>
+            <div><strong>Timezone:</strong> ${esc(usage?.timezone || '—')}</div>
+            <div><strong>Language:</strong> ${esc(usage?.language || '—')}</div>
+            <div><strong>User-Agent:</strong> ${esc(usage?.userAgent || '—')}</div>
+          </div>
+
+          <div class="hint" style="margin-top:8px;">
+            stableDeviceKey: <span class="mono">${esc(deviceKey || '—')}</span>
+          </div>
+          <div class="hint" style="margin-top:8px;">
+            rawDeviceKey: <span class="mono">${esc(rawDeviceKey || '—')}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function linkCardHtml(link, idx) {
+      const foreignCount = getLinkForeignCount(link);
+      const uniqueDevices = Number(link?.uniqueDevices || 0);
+      const isViolator = foreignCount > 0 || link?.isViolator;
+      const contentId = `content-${esc(link?.id || 'x')}-${idx}`;
+      const devicesId = `devices-${esc(link?.id || 'x')}-${idx}`;
+
+      const activations = link?.activations || [];
+      const violations = link?.violations || [];
+
+      return `
+        <div class="link-card">
+          <div class="link-head">
+            <div class="link-title">
+              <div><strong>${esc(link?.token || '—')}</strong></div>
+              <div class="hint">Создана: ${esc(formatDate(link?.createdAt))}</div>
+            </div>
+            <div>${isViolator ? '<span class="pill pill-danger">violator</span>' : '<span class="pill">ok</span>'}</div>
+          </div>
+
+          <div class="metrics-row">
+            <div class="metric-item">
+              <span class="metric-dot ${getDotClass(link?.usedCount, 'activations')}"></span>
+              <span class="metric-label">Акт: <span class="metric-value">${Number(link?.usedCount || 0)}</span></span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-dot ${getDotClass(link?.maxActivations - link?.usedCount, 'limit')}"></span>
+              <span class="metric-label">Лимит: <span class="metric-value">${Number(link?.maxActivations || 0)}</span></span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-dot ${getDotClass(uniqueDevices, 'devices')}"></span>
+              <span class="metric-label">Устр: <span class="metric-value">${uniqueDevices}</span></span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-dot ${getDotClass(foreignCount, 'foreign')}"></span>
+              <span class="metric-label">Чужие: <span class="metric-value">${foreignCount}</span></span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-dot ${getDotClass(link?.remaining, 'remaining')}"></span>
+              <span class="metric-label">Осталось: <span class="metric-value">${Number(link?.remaining || 0)}</span></span>
+            </div>
+            <button class="spoiler-btn" onclick="toggleContent('${contentId}', this)">Показать</button>
+          </div>
+
+          <div id="${contentId}" class="hidden">
+            <div class="facts">
+              <div class="fact ${getFactClass(link?.usedCount, 'activations')}">
+                <div class="k">Активаций</div>
+                <div class="v">${Number(link?.usedCount || 0)}</div>
+              </div>
+              <div class="fact ${link?.usedCount >= link?.maxActivations ? 'fact-warning' : 'fact-good'}">
+                <div class="k">Лимит</div>
+                <div class="v">${Number(link?.maxActivations || 0)}</div>
+              </div>
+              <div class="fact ${getFactClass(uniqueDevices, 'devices')}">
+                <div class="k">Stable устр.</div>
+                <div class="v">${uniqueDevices}</div>
+              </div>
+              <div class="fact ${getFactClass(foreignCount, 'foreign')}">
+                <div class="k">Чужие</div>
+                <div class="v">${foreignCount}</div>
+              </div>
+              <div class="fact ${getFactClass(link?.remaining, 'remaining')}">
+                <div class="k">Осталось</div>
+                <div class="v">${Number(link?.remaining || 0)}</div>
+              </div>
+              <div class="fact ${getFactClass(link?.status, 'status')}">
+                <div class="k">Статус</div>
+                <div class="v">${esc(link?.status || '—')}</div>
+              </div>
+            </div>
+
+            <div class="link-actions">
+              <button onclick="toggleDevices('${devicesId}')">Показать устройства</button>
+              <button class="btn-danger" onclick="resetLink('${esc(link?.id || '')}')">Сбросить устройства</button>
+              <button class="btn-danger" onclick="deleteLink('${esc(link?.id || '')}')">Удалить ссылку</button>
+            </div>
+
+            <div id="${devicesId}" class="link-details">
+              <div class="hint" style="margin-top:10px;">Основной stableDeviceKey:</div>
+              <div class="mono" style="margin-top:4px;">${esc(link?.primaryDeviceKey || '—')}</div>
+              <div class="hint" style="margin-top:10px;">Последнее использование: ${esc(formatDate(link?.lastUsedAt))}</div>
+
+              <div class="usage-list">
+                ${activations.map((a, i) => usageItemHtml(a, i, link?.id, link?.primaryDeviceKey, false)).join('')}
+                ${violations.map((v, i) => usageItemHtml(v, i, link?.id, link?.primaryDeviceKey, true)).join('')}
+                ${!activations.length && !violations.length ? '<div class="empty">Использований пока нет.</div>' : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function groupCardHtml(group, index) {
+      const violator = isGroupViolator(group);
+      const links = Array.isArray(group?.links) ? group.links : [];
+      const foreignCount = Number(group?.foreignDeviceCountTotal || 0);
+      const uniqueDevices = Number(group?.uniqueDevices || 0);
+
+      return `
+        <div class="group-card">
+          <div class="group-head">
+            <div class="group-title">
+              <div><strong>${esc(group?.username || '—')}</strong></div>
+              <div class="mono">${esc(group?.subscriptionUrl || '—')}</div>
+              <div class="hint">Последняя активация: ${esc(formatDate(group?.lastUsedAt))}</div>
+            </div>
+            <div>${violator ? '<span class="pill pill-danger">violator</span>' : '<span class="pill">ok</span>'}</div>
+          </div>
+
+          <div class="facts">
+            <div class="fact fact-good">
+              <div class="k">Ссылок</div>
+              <div class="v">${Number(group?.linksCount || 0)}</div>
+            </div>
+            <div class="fact ${group?.usedCountTotal > 0 ? 'fact-good' : ''}">
+              <div class="k">Активаций</div>
+              <div class="v">${Number(group?.usedCountTotal || 0)}</div>
+            </div>
+            <div class="fact ${getFactClass(uniqueDevices, 'devices')}">
+              <div class="k">Stable устр.</div>
+              <div class="v">${uniqueDevices}</div>
+            </div>
+            <div class="fact ${getFactClass(foreignCount, 'foreign')}">
+              <div class="k">Чужих</div>
+              <div class="v">${foreignCount}</div>
+            </div>
+            <div class="fact ${group?.violatorLinks > 0 ? 'fact-bad' : 'fact-good'}">
+              <div class="k">Наруш. ссылок</div>
+              <div class="v">${Number(group?.violatorLinks || 0)}</div>
+            </div>
+            <div class="fact ${getFactClass(violator ? 'violator' : 'ok', 'status')}">
+              <div class="k">Статус</div>
+              <div class="v">${violator ? 'violator' : 'ok'}</div>
+            </div>
+          </div>
+
+          <div class="links-list">
+            ${links.map((link, linkIndex) => linkCardHtml(link, `${index}-${linkIndex}`)).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function filterGroups(groups, searchTerm) {
+      if (!searchTerm) return groups;
+      
+      const term = searchTerm.toLowerCase();
+      return groups.filter(group => {
+        if (group.username && group.username.toLowerCase().includes(term)) return true;
+        if (group.subscriptionUrl && group.subscriptionUrl.toLowerCase().includes(term)) return true;
+        return false;
+      });
+    }
+
+    function renderGroups(groups) {
+      const searchTerm = els.searchInput.value;
+      const filteredGroups = filterGroups(groups, searchTerm);
+      
+      els.searchStats.textContent = `Найдено: ${filteredGroups.length} из ${groups.length}`;
+
+      if (!filteredGroups.length) {
+        els.groupsList.innerHTML = `<div class="empty">Ничего не найдено</div>`;
+        return;
+      }
+
+      const sorted = [...filteredGroups].sort((a, b) => {
+        const av = isGroupViolator(a) ? 1 : 0;
+        const bv = isGroupViolator(b) ? 1 : 0;
+        if (av !== bv) return bv - av;
+
+        const ad = new Date(a?.lastUsedAt || 0).getTime();
+        const bd = new Date(b?.lastUsedAt || 0).getTime();
+        return bd - ad;
+      });
+
+      els.groupsList.innerHTML = sorted.map((group, index) => groupCardHtml(group, index)).join('');
+    }
+
+    async function loadData() {
+      els.refreshBtn.disabled = true;
+      try {
+        const data = await api('/happ/api/admin/groups');
+        allGroups = Array.isArray(data?.groups) ? data.groups : [];
+        renderStats(allGroups);
+        renderViolators(allGroups);
+        renderGroups(allGroups);
+      } catch (e) {
+        els.violatorsList.innerHTML = `<div class="empty">Ошибка загрузки: ${esc(e.message)}</div>`;
+        els.groupsList.innerHTML = `<div class="empty">Ошибка загрузки: ${esc(e.message)}</div>`;
+      } finally {
+        els.refreshBtn.disabled = false;
+      }
+    }
+
+    function handleSearch() {
+      if (searchTimeout) clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        renderGroups(allGroups);
+      }, 300);
+    }
+
+    function toggleContent(id, btn) {
+      const content = document.getElementById(id);
+      if (content) {
+        content.classList.toggle('hidden');
+        btn.textContent = content.classList.contains('hidden') ? 'Показать' : 'Скрыть';
+      }
+    }
+
+    function toggleDevices(id) {
+      const devices = document.getElementById(id);
+      if (devices) {
+        devices.classList.toggle('open');
+      }
+    }
+
+    async function deleteLink(id) {
+      if (!id || !confirm('Удалить эту ссылку?')) return;
+      try {
+        await api(`/happ/api/admin/link/${encodeURIComponent(id)}`, { method: 'DELETE' });
+        await loadData();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function resetLink(id) {
+      if (!id || !confirm('Сбросить все устройства у этой ссылки?')) return;
+      try {
+        await api(`/happ/api/admin/link/${encodeURIComponent(id)}/reset`, { method: 'DELETE' });
+        await loadData();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    window.toggleContent = toggleContent;
+    window.toggleDevices = toggleDevices;
+    window.deleteLink = deleteLink;
+    window.resetLink = resetLink;
+    window.deleteActivation = deleteActivation;
+    window.deleteViolation = deleteViolation;
+
+    document.getElementById('refreshBtn').addEventListener('click', loadData);
+    els.searchInput.addEventListener('input', handleSearch);
+    loadData();
+  </script>
+</body>
+</html>

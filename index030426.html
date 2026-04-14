@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HAPP Generator</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --primary: #2563eb;
+      --primary-2: #1d4ed8;
+      --soft: #f8fafc;
+      --shadow: 0 10px 30px rgba(37, 99, 235, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 20%),
+        linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 36px 18px 48px;
+    }
+
+    .header {
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 34px;
+      letter-spacing: -0.03em;
+    }
+
+    .sub {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 680px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      margin: 14px 0 8px;
+    }
+
+    textarea, input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-size: 15px;
+      outline: none;
+      background: white;
+      color: var(--text);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 180px;
+      gap: 14px;
+      align-items: end;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button, a.btn {
+      appearance: none;
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 16px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      color: white;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    }
+
+    .btn-light {
+      color: var(--text);
+      background: var(--soft);
+      border: 1px solid var(--line);
+    }
+
+    .result {
+      margin-top: 16px;
+      display: none;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+    }
+
+    .block {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 16px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+    }
+
+    .block-title {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      word-break: break-all;
+      color: #1e3a8a;
+      white-space: pre-wrap;
+    }
+
+    .hint {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .error {
+      display: none;
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 16px;
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      color: #be123c;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    @media (max-width: 720px) {
+      .row {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="eyebrow">HAPP</div>
+      <h1>Генератор ссылок</h1>
+      <p class="sub">Вставь обычную HTTPS-подписку, укажи лимит активаций и получи готовую страницу пользователя.</p>
+    </div>
+
+    <div class="card">
+      <label for="subscriptionUrl">Ссылка подписки</label>
+      <textarea id="subscriptionUrl" spellcheck="false" placeholder="https://yourdomain.com:port/sublinkurl/users"></textarea>
+
+      <div class="block" style="margin-top:10px;">
+        <div class="block-title">Что будет отправлено</div>
+        <div id="previewValue" class="code">—</div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="maxActivations">Лимит активаций</label>
+          <input id="maxActivations" type="number" min="1" max="100" value="1" />
+        </div>
+        <div class="actions" style="margin-top:0;">
+          <button id="generateBtn" class="btn-primary" style="width:100%;">Создать</button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a class="btn btn-light" href="/happ/admin.html" target="_blank" rel="noopener">Админка</a>
+      </div>
+
+      <div id="error" class="error"></div>
+
+      <div id="result" class="result">
+        <div class="block">
+          <div class="block-title">Страница пользователя</div>
+          <div id="clientLink" class="code"></div>
+          <div class="actions">
+            <button id="copyClientBtn" class="btn-light">Копировать</button>
+            <a id="openClientBtn" class="btn btn-primary" href="#" target="_blank" rel="noopener">Открыть страницу пользователя</a>
+          </div>
+        </div>
+
+        <div class="block">
+          <div class="block-title">Зашифрованная ссылка HAPP</div>
+          <div id="happLink" class="code"></div>
+          <div class="actions">
+            <button id="copyHappBtn" class="btn-light">Копировать HAPP ссылку</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="hint">
+        Вставляйте обычную ссылку, например: <strong>https://yourdomain.com:port/sublinkurl/users</strong>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const subscriptionUrlEl = document.getElementById('subscriptionUrl');
+    const maxActivationsEl = document.getElementById('maxActivations');
+    const generateBtn = document.getElementById('generateBtn');
+    const errorEl = document.getElementById('error');
+    const resultEl = document.getElementById('result');
+    const previewValueEl = document.getElementById('previewValue');
+
+    const clientLinkEl = document.getElementById('clientLink');
+    const happLinkEl = document.getElementById('happLink');
+    const copyClientBtn = document.getElementById('copyClientBtn');
+    const copyHappBtn = document.getElementById('copyHappBtn');
+    const openClientBtn = document.getElementById('openClientBtn');
+
+    let latestClientLink = '';
+    let latestHappLink = '';
+
+    function normalizePreview(value) {
+      let v = String(value || '').trim();
+
+      const mdMatch = v.match(/^\[([^\]]+)\]\((https?:\/\/[^)]+)\)$/i);
+      if (mdMatch) v = mdMatch[2].trim();
+
+      const angleMatch = v.match(/^<\s*(https?:\/\/[^>]+)\s*>$/i);
+      if (angleMatch) v = angleMatch[1].trim();
+
+      v = v.replace(/^["']+|["']+$/g, '').trim();
+
+      if (!/^https?:\/\//i.test(v) && /^[a-z0-9.-]+\.[a-z]{2,}([/:?#].*)?$/i.test(v)) {
+        v = `https://${v}`;
+      }
+
+      return v || '—';
+    }
+
+    function updatePreview() {
+      previewValueEl.textContent = normalizePreview(subscriptionUrlEl.value);
+    }
+
+    function absoluteUrl(path) {
+      return new URL(path, window.location.origin).toString();
+    }
+
+    async function copyText(text, button, okText) {
+      const oldText = button.textContent;
+
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+        }
+
+        button.textContent = okText;
+        setTimeout(() => {
+          button.textContent = oldText;
+        }, 1200);
+      } catch (e) {
+        errorEl.textContent = 'Не удалось скопировать в буфер обмена';
+        errorEl.style.display = 'block';
+      }
+    }
+
+    async function generate() {
+      errorEl.style.display = 'none';
+      resultEl.style.display = 'none';
+
+      const payload = {
+        subscriptionUrl: subscriptionUrlEl.value,
+        maxActivations: Number(maxActivationsEl.value)
+      };
+
+      try {
+        const response = await fetch('/happ/api/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          throw new Error(JSON.stringify(data, null, 2));
+        }
+
+        latestClientLink = absoluteUrl(data.onceLink);
+        latestHappLink = data.happLink || '';
+
+        clientLinkEl.textContent = latestClientLink;
+        happLinkEl.textContent = latestHappLink || '-';
+        openClientBtn.href = latestClientLink;
+
+        resultEl.style.display = 'block';
+      } catch (e) {
+        errorEl.textContent = e.message || 'Ошибка генерации';
+        errorEl.style.display = 'block';
+      }
+    }
+
+    generateBtn.addEventListener('click', generate);
+    subscriptionUrlEl.addEventListener('input', updatePreview);
+
+    copyClientBtn.addEventListener('click', () => {
+      if (!latestClientLink) return;
+      copyText(latestClientLink, copyClientBtn, 'Скопировано');
+    });
+
+    copyHappBtn.addEventListener('click', () => {
+      if (!latestHappLink) return;
+      copyText(latestHappLink, copyHappBtn, 'Скопировано');
+    });
+
+    updatePreview();
+  </script>
+</body>
+</html>

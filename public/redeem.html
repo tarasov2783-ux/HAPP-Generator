@@ -1,0 +1,1205 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HAPP — установка подписки</title>
+  <style>
+    :root{
+      --bg:#07111e;
+      --panel:#0c1728;
+      --panel-2:#101d31;
+      --line:#22324d;
+      --text:#eef4ff;
+      --muted:#9caecc;
+      --cyan:#17d5e8;
+      --cyan-2:#0fc3dd;
+      --cyan-soft:rgba(23,213,232,.14);
+      --green:#22d39b;
+      --red:#ff7272;
+      --warn:#f0b35a;
+      --shadow:0 30px 80px rgba(0,0,0,.35);
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      min-height:100vh;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top, rgba(25,86,148,.28), transparent 28%),
+        linear-gradient(180deg,#07101c 0%, #081221 100%);
+      padding:22px;
+    }
+
+    .page{
+      max-width:1120px;
+      margin:0 auto;
+    }
+
+    .shell{
+      background:linear-gradient(180deg, rgba(12,23,40,.97), rgba(10,18,31,.98));
+      border:1px solid rgba(77,104,145,.28);
+      border-radius:28px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:22px 24px;
+      border-bottom:1px solid rgba(77,104,145,.18);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+
+    .logo{
+      width:46px;
+      height:46px;
+      border-radius:14px;
+      background:linear-gradient(135deg, var(--cyan), #4efccf);
+      color:#05111c;
+      display:grid;
+      place-items:center;
+      font-weight:900;
+      box-shadow:0 10px 26px rgba(23,213,232,.24);
+      flex:0 0 auto;
+      font-size:22px;
+    }
+
+    .brand-title{
+      font-size:24px;
+      font-weight:900;
+      line-height:1.1;
+      margin-bottom:4px;
+    }
+
+    .brand-sub{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    .top-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      border-radius:14px;
+      padding:13px 18px;
+      font-size:15px;
+      font-weight:800;
+      cursor:pointer;
+      transition:.18s ease;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      white-space:nowrap;
+    }
+
+    .btn:hover{transform:translateY(-1px)}
+    .btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
+    .btn-primary{
+      background:linear-gradient(135deg, var(--cyan), var(--cyan-2));
+      color:#04111d;
+      box-shadow:0 14px 28px rgba(23,213,232,.24);
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,.03);
+      color:var(--text);
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .hero{
+      padding:26px 24px 10px;
+    }
+
+    .hero-card,
+    .timeline-card,
+    .device-card,
+    .info-card{
+      background:rgba(255,255,255,.02);
+      border:1px solid rgba(77,104,145,.22);
+      border-radius:22px;
+    }
+
+    .hero-card{
+      padding:24px;
+    }
+
+    .hero-title{
+      font-size:34px;
+      line-height:1.05;
+      font-weight:900;
+      margin:0 0 12px;
+    }
+
+    .hero-text{
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.6;
+      margin-bottom:18px;
+      max-width:760px;
+    }
+
+    .notice{
+      display:none;
+      border-radius:16px;
+      padding:14px 16px;
+      margin-top:14px;
+      line-height:1.5;
+      border:1px solid transparent;
+      white-space:pre-wrap;
+      word-break:break-word;
+      font-size:14px;
+    }
+
+    .notice.show{display:block}
+    .notice.info{
+      background:rgba(23,213,232,.10);
+      color:#c8f8ff;
+      border-color:rgba(23,213,232,.28);
+    }
+    .notice.success{
+      background:rgba(34,211,155,.12);
+      color:#c5ffea;
+      border-color:rgba(34,211,155,.26);
+    }
+    .notice.error{
+      background:rgba(255,114,114,.11);
+      color:#ffd0d0;
+      border-color:rgba(255,114,114,.24);
+    }
+    .notice.warn{
+      background:rgba(240,179,90,.12);
+      color:#ffe4b0;
+      border-color:rgba(240,179,90,.22);
+    }
+
+    .quick{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-top:18px;
+    }
+
+    .quick-item{
+      background:var(--panel-2);
+      border:1px solid rgba(77,104,145,.2);
+      border-radius:18px;
+      padding:14px;
+    }
+
+    .quick-k{
+      color:var(--muted);
+      font-size:13px;
+      margin-bottom:7px;
+    }
+
+    .quick-v{
+      font-size:19px;
+      font-weight:900;
+      line-height:1.2;
+      word-break:break-word;
+    }
+
+    .platform-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:12px 14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(77,104,145,.2);
+      margin-bottom:16px;
+    }
+
+    .platform-icon{
+      width:40px;
+      height:40px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      background:var(--panel-2);
+      border:1px solid rgba(77,104,145,.2);
+      font-size:22px;
+      line-height:1;
+    }
+
+    .platform-meta{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+
+    .platform-label{
+      color:var(--muted);
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+
+    .platform-name{
+      font-size:16px;
+      font-weight:800;
+    }
+
+    .timeline-wrap{
+      padding:14px 24px 8px;
+    }
+
+    .timeline-card{
+      padding:24px;
+    }
+
+    .timeline-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .timeline-title{
+      font-size:28px;
+      font-weight:900;
+      line-height:1.1;
+      margin-bottom:6px;
+    }
+
+    .timeline-sub{
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.55;
+      max-width:760px;
+    }
+
+    .steps{
+      position:relative;
+      margin-top:8px;
+    }
+
+    .step{
+      position:relative;
+      display:grid;
+      grid-template-columns:38px 1fr;
+      gap:16px;
+      padding:0 0 24px;
+    }
+
+    .step:last-child{padding-bottom:0}
+
+    .step:not(:last-child)::after{
+      content:"";
+      position:absolute;
+      left:18px;
+      top:38px;
+      width:2px;
+      height:calc(100% - 18px);
+      background:linear-gradient(180deg, rgba(23,213,232,.9), rgba(23,213,232,.08));
+    }
+
+    .step-icon{
+      width:38px;
+      height:38px;
+      border-radius:999px;
+      background:var(--cyan-soft);
+      border:1px solid rgba(23,213,232,.35);
+      display:grid;
+      place-items:center;
+      color:#8ff7ff;
+      font-weight:900;
+      z-index:1;
+      box-shadow:0 0 0 6px rgba(7,17,30,.95);
+    }
+
+    .step-body{
+      padding-top:1px;
+    }
+
+    .step-title{
+      font-size:18px;
+      font-weight:850;
+      margin-bottom:6px;
+    }
+
+    .step-text{
+      color:var(--muted);
+      line-height:1.6;
+      font-size:15px;
+      margin-bottom:14px;
+      max-width:760px;
+    }
+
+    .step-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .small{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.55;
+    }
+
+    .download-note{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    /* Блок информации об устройстве */
+    .device-section {
+      padding: 0 24px 28px;
+    }
+
+    .device-card {
+      padding: 20px 24px;
+      background: linear-gradient(135deg, rgba(23,213,232,0.05) 0%, rgba(79, 172, 254, 0.05) 100%);
+      border: 1px solid rgba(23,213,232,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .device-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .device-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--cyan-soft);
+      border: 1px solid rgba(23,213,232,0.3);
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      color: #8ff7ff;
+    }
+
+    .device-details {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .device-os-browser {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .device-os-browser small {
+      font-weight: 400;
+      font-size: 13px;
+      color: var(--muted);
+      margin-left: 8px;
+    }
+
+    .device-date {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .device-badge {
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 600;
+      background: rgba(34,211,155,0.15);
+      border: 1px solid rgba(34,211,155,0.3);
+      color: #c5ffea;
+    }
+
+    .device-badge.warning {
+      background: rgba(240,179,90,0.15);
+      border-color: rgba(240,179,90,0.3);
+      color: #ffe4b0;
+    }
+
+    /* Блок с подсказкой */
+    .info-section {
+      padding: 0 24px 28px;
+    }
+
+    .info-card {
+      padding: 16px 20px;
+      background: rgba(240,179,90,0.05);
+      border: 1px solid rgba(240,179,90,0.2);
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .info-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .info-content {
+      flex: 1;
+    }
+
+    .info-title {
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      color: #ffe4b0;
+    }
+
+    .info-text {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .info-text strong {
+      color: #ffe4b0;
+      font-weight: 600;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 680px){
+      body{padding:12px}
+      .topbar,.hero,.timeline-wrap,.device-section,.info-section{padding-left:16px;padding-right:16px}
+      .hero-title{font-size:28px}
+      .timeline-title{font-size:23px}
+      .quick{grid-template-columns:1fr}
+      .topbar{align-items:flex-start;flex-direction:column}
+      .top-actions{width:100%;justify-content:stretch}
+      .top-actions .btn{width:100%}
+      .device-card,.info-card{flex-direction:column;align-items:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="shell">
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo" id="brandLogo">H</div>
+          <div>
+            <div class="brand-title" id="pageTitle">HAPP</div>
+            <div class="brand-sub" id="pageSub">Добавление подписки в один клик.</div>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <button class="btn btn-secondary" id="openStoreTopBtn" style="display:none;">Открыть магазин</button>
+        </div>
+      </div>
+
+      <div class="hero">
+        <div class="hero-card">
+          <div class="platform-chip">
+            <div class="platform-icon" id="platformIcon">⌁</div>
+            <div class="platform-meta">
+              <div class="platform-label">Платформа</div>
+              <div class="platform-name" id="platformName">Определяем...</div>
+            </div>
+          </div>
+
+          <h1 class="hero-title">Установка подписки</h1>
+          <div class="hero-text" id="heroText">
+            Страница проверит устройство, затем попробует открыть HAPP. Если клиента нет, откроется магазин или ссылка на установку.
+          </div>
+
+          <div id="notice" class="notice"></div>
+
+          <div class="quick">
+            <div class="quick-item">
+              <div class="quick-k">Пользователь</div>
+              <div class="quick-v" id="metaUser">—</div>
+            </div>
+            <div class="quick-item">
+              <div class="quick-k">Осталось активаций</div>
+              <div class="quick-v" id="metaRemaining">—</div>
+            </div>
+            <div class="quick-item">
+              <div class="quick-k">Статус</div>
+              <div class="quick-v" id="metaStatus">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-wrap">
+        <div class="timeline-card">
+          <div class="timeline-head">
+            <div>
+              <div class="timeline-title">Пошаговая установка</div>
+              <div class="timeline-sub" id="timelineSub">
+                Сначала страница проверяет устройство, затем пробует открыть HAPP. Если приложение не открылось, откроется магазин или установщик для вашей платформы.
+              </div>
+            </div>
+          </div>
+
+          <div class="steps">
+            <div class="step">
+              <div class="step-icon">1</div>
+              <div class="step-body">
+                <div class="step-title">Проверка устройства</div>
+                <div class="step-text">
+                  Система проверит, можно ли активировать подписку на этом устройстве.
+                </div>
+                <div class="step-actions">
+                  <button class="btn btn-secondary" id="recheckBtn">Проверить ещё раз</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-icon">2</div>
+              <div class="step-body">
+                <div class="step-title" id="step2Title">Открытие HAPP</div>
+                <div class="step-text" id="step2Text">
+                  Если устройство подходит, браузер откроет приложение.
+                </div>
+                <div class="step-actions">
+                  <button class="btn btn-primary" id="addBtn" style="display:none;">Добавить в HAPP</button>
+                  <button class="btn btn-secondary" id="storeBtn" style="display:none;">Открыть магазин</button>
+                </div>
+                <div class="download-note" id="downloadNote" style="display:none;"></div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-icon">3</div>
+              <div class="step-body">
+                <div class="step-title">Автоимпорт</div>
+                <div class="step-text">
+                  После нажатия кнопки страница попытается открыть HAPP и передать подписку автоматически.
+                </div>
+                <div class="small" id="footerHint" style="margin-top:12px;">
+                  Если приложение не установлено, откроется магазин или страница загрузки без списания активации.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Блок информации об устройстве -->
+      <div class="device-section">
+        <div class="device-card" id="deviceInfoCard">
+          <div class="device-info">
+            <div class="device-icon" id="deviceIcon">📱</div>
+            <div class="device-details">
+              <div class="device-os-browser" id="deviceOsBrowser">—</div>
+              <div class="device-date" id="deviceDate">—</div>
+            </div>
+          </div>
+          <div id="deviceBadge" class="device-badge hidden">✓ Это устройство</div>
+          <div id="deviceWarning" class="device-badge warning hidden">⚠ Другое устройство</div>
+        </div>
+      </div>
+
+      <!-- Блок с подсказкой о повторной активации -->
+      <div class="info-section">
+        <div class="info-card" id="infoCard">
+          <div class="info-icon">ℹ️</div>
+          <div class="info-content">
+            <div class="info-title" id="infoTitle">Повторная активация</div>
+            <div class="info-text" id="infoText">
+              Вы можете активировать подписку повторно на <strong>том же устройстве, в том же браузере и с той же операционной системой</strong>.<br><br>
+              Если вы сменили браузер, переустановили ОС или используете другое устройство — это может быть расценено как новое устройство.<br><br>
+              По вопросам активации обращайтесь в <strong>поддержку</strong>.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = location.pathname.split('/').filter(Boolean).pop();
+    const WINDOWS_DOWNLOAD_URL = 'https://github.com/Happ-proxy/happ-desktop/releases/latest/download/setup-Happ.x64.exe';
+    const MACOS_DOWNLOAD_URL = 'https://github.com/Happ-proxy/happ-desktop/releases/latest/download/Happ-x64.dmg';
+    const LINUX_DOWNLOAD_URL = 'https://github.com/Happ-proxy/happ-desktop/releases/latest/download/happ-desktop-x86_64.AppImage';
+
+    const noticeEl = document.getElementById('notice');
+    const metaUser = document.getElementById('metaUser');
+    const metaRemaining = document.getElementById('metaRemaining');
+    const metaStatus = document.getElementById('metaStatus');
+
+    const pageTitle = document.getElementById('pageTitle');
+    const pageSub = document.getElementById('pageSub');
+    const heroText = document.getElementById('heroText');
+    const step2Title = document.getElementById('step2Title');
+    const step2Text = document.getElementById('step2Text');
+    const footerHint = document.getElementById('footerHint');
+    const timelineSub = document.getElementById('timelineSub');
+
+    const platformIcon = document.getElementById('platformIcon');
+    const platformName = document.getElementById('platformName');
+    const brandLogo = document.getElementById('brandLogo');
+
+    const openStoreTopBtn = document.getElementById('openStoreTopBtn');
+    const recheckBtn = document.getElementById('recheckBtn');
+    const addBtn = document.getElementById('addBtn');
+    const storeBtn = document.getElementById('storeBtn');
+    const downloadNote = document.getElementById('downloadNote');
+
+    // Элементы для информации об устройстве
+    const deviceInfoCard = document.getElementById('deviceInfoCard');
+    const deviceIcon = document.getElementById('deviceIcon');
+    const deviceOsBrowser = document.getElementById('deviceOsBrowser');
+    const deviceDate = document.getElementById('deviceDate');
+    const deviceBadge = document.getElementById('deviceBadge');
+    const deviceWarning = document.getElementById('deviceWarning');
+
+    // Элементы для подсказки
+    const infoCard = document.getElementById('infoCard');
+    const infoTitle = document.getElementById('infoTitle');
+    const infoText = document.getElementById('infoText');
+
+    let previewData = null;
+    let currentOS = 'Other';
+    let currentStoreUrl = '';
+    let browserToken = '';
+    let confirmSent = false;
+    let deviceChecked = false;
+
+    function showNotice(type, text) {
+      noticeEl.className = `notice show ${type}`;
+      noticeEl.textContent = text;
+    }
+
+    function hideNotice() {
+      noticeEl.className = 'notice';
+      noticeEl.textContent = '';
+    }
+
+    function detectOS() {
+      const ua = navigator.userAgent || '';
+      const platform = navigator.platform || '';
+      const uaDataPlatform = navigator.userAgentData?.platform || '';
+      const maxTouchPoints = navigator.maxTouchPoints || 0;
+
+      const p = String(uaDataPlatform || platform).toLowerCase();
+      const u = ua.toLowerCase();
+
+      const isIOS =
+        /iphone|ipad|ipod/.test(u) ||
+        /iphone|ipad|ipod/.test(p) ||
+        (platform === 'MacIntel' && maxTouchPoints > 1);
+
+      if (isIOS) return 'iOS';
+      if (p.includes('android') || u.includes('android')) return 'Android';
+      if (p.includes('win') || u.includes('windows nt')) return 'Windows';
+      if (p.includes('mac') || u.includes('mac os x') || u.includes('macintosh')) return 'macOS';
+      if (p.includes('linux') || u.includes('linux')) return 'Linux';
+
+      return 'Other';
+    }
+
+    function getPlatformVisual(os) {
+      if (os === 'iOS' || os === 'macOS') return { icon: '', label: os === 'iOS' ? 'Apple iOS' : 'Apple macOS' };
+      if (os === 'Android') return { icon: '🤖', label: 'Android' };
+      if (os === 'Windows') return { icon: '⊞', label: 'Windows' };
+      if (os === 'Linux') return { icon: '🐧', label: 'Linux' };
+      return { icon: '⌁', label: 'Неизвестная платформа' };
+    }
+
+    function applyPlatformVisual(os) {
+      const visual = getPlatformVisual(os);
+      platformIcon.textContent = visual.icon;
+      platformName.textContent = visual.label;
+      brandLogo.textContent = visual.icon;
+    }
+
+    function applyPlatformTexts(os) {
+      applyPlatformVisual(os);
+
+      if (os === 'Android') {
+        pageTitle.textContent = 'HAPP для Android';
+        pageSub.textContent = 'Добавление подписки в один клик. Если клиент не установлен, откроется Google Play без списания активации.';
+        heroText.textContent = 'Страница проверит устройство, затем попробует открыть HAPP. Если клиента нет, откроется Google Play.';
+        timelineSub.textContent = 'Сначала страница проверяет устройство, затем пробует открыть HAPP. Если приложение не открылось, открывается Google Play.';
+        step2Title.textContent = 'Открытие HAPP / Google Play';
+        step2Text.textContent = 'Если устройство подходит, кнопка откроет приложение и выполнит автоимпорт.';
+        storeBtn.textContent = 'Открыть Google Play';
+        openStoreTopBtn.textContent = 'Google Play';
+        footerHint.textContent = 'Если приложение не установлено, откроется магазин без списания активации.';
+        downloadNote.style.display = 'none';
+        return;
+      }
+
+      if (os === 'iOS') {
+        pageTitle.textContent = 'HAPP для iPhone / iPad';
+        pageSub.textContent = 'Добавление подписки в один клик. Если клиент не установлен, откроется App Store без списания активации.';
+        heroText.textContent = 'Страница проверит устройство, затем попробует открыть HAPP. Если клиента нет, откроется App Store.';
+        timelineSub.textContent = 'Сначала страница проверяет устройство, затем пробует открыть HAPP. Если приложение не открылось, открывается App Store.';
+        step2Title.textContent = 'Открытие HAPP / App Store';
+        step2Text.textContent = 'Если устройство подходит, кнопка откроет приложение и выполнит автоимпорт.';
+        storeBtn.textContent = 'Открыть App Store';
+        openStoreTopBtn.textContent = 'App Store';
+        footerHint.textContent = 'Если приложение не установлено, откроется магазин без списания активации.';
+        downloadNote.style.display = 'none';
+        return;
+      }
+
+      if (os === 'Windows') {
+        pageTitle.textContent = 'HAPP для Windows';
+        pageSub.textContent = 'Добавление подписки в один клик. Если клиент не установлен, откроется установщик Windows без списания активации.';
+        heroText.textContent = 'Страница проверит устройство, затем попробует открыть HAPP. Если клиента нет, откроется ссылка на установщик Windows.';
+        timelineSub.textContent = 'Сначала страница проверяет устройство, затем пробует открыть HAPP. Если приложение не открылось, открывается установщик Windows.';
+        step2Title.textContent = 'Открытие HAPP / установка Windows';
+        step2Text.textContent = 'Если устройство подходит, кнопка откроет приложение и выполнит автоимпорт.';
+        storeBtn.textContent = 'Скачать HAPP для Windows';
+        openStoreTopBtn.textContent = 'Скачать Windows';
+        footerHint.textContent = 'Если приложение не установлено, откроется установщик без списания активации.';
+        downloadNote.style.display = 'block';
+        downloadNote.textContent = 'Если HAPP ещё не установлен, скачайте установщик, установите клиент и затем снова нажмите «Добавить в HAPP».';
+        return;
+      }
+
+      if (os === 'macOS') {
+        pageTitle.textContent = 'HAPP для macOS';
+        pageSub.textContent = 'Платформа определена как macOS. Если клиента нет, используйте страницу загрузки HAPP.';
+        heroText.textContent = 'Страница проверит устройство, затем попробует открыть HAPP. Если клиента нет, откроется страница загрузки.';
+        timelineSub.textContent = 'Сначала страница проверяет устройство, затем пробует открыть HAPP. Если приложение не открылось, открывается страница загрузки.';
+        step2Title.textContent = 'Открытие HAPP / загрузка';
+        step2Text.textContent = 'Если устройство подходит, кнопка откроет приложение и выполнит автоимпорт.';
+        storeBtn.textContent = 'Скачать для macOS';
+        openStoreTopBtn.textContent = 'Скачать macOS';
+        footerHint.textContent = 'Если приложение не установлено, откроется страница загрузки без списания активации.';
+        downloadNote.style.display = 'none';
+        return;
+      }
+
+      if (os === 'Linux') {
+        pageTitle.textContent = 'HAPP для Linux';
+        pageSub.textContent = 'Платформа определена как Linux. Если клиента нет, используйте страницу загрузки HAPP.';
+        heroText.textContent = 'Страница проверит устройство, затем попробует открыть HAPP. Если клиента нет, откроется страница загрузки.';
+        timelineSub.textContent = 'Сначала страница проверяет устройство, затем пробует открыть HAPP. Если приложение не открылось, открывается страница загрузки.';
+        step2Title.textContent = 'Открытие HAPP / загрузка';
+        step2Text.textContent = 'Если устройство подходит, кнопка откроет приложение и выполнит автоимпорт.';
+        storeBtn.textContent = 'Скачать для Linux';
+        openStoreTopBtn.textContent = 'Скачать Linux';
+        footerHint.textContent = 'Если приложение не установлено, откроется страница загрузки без списания активации.';
+        downloadNote.style.display = 'none';
+        return;
+      }
+
+      pageTitle.textContent = 'HAPP';
+      pageSub.textContent = 'Платформа не определилась точно, но проверка устройства всё равно будет выполнена.';
+      heroText.textContent = 'Страница проверит устройство, затем попробует открыть HAPP. Если клиента нет, откроется ссылка загрузки.';
+      timelineSub.textContent = 'Сначала страница проверяет устройство, затем пробует открыть HAPP. Если приложение не открылось, открывается ссылка загрузки.';
+      step2Title.textContent = 'Открытие приложения';
+      step2Text.textContent = 'Если устройство подходит, кнопка откроет приложение и выполнит автоимпорт.';
+      storeBtn.textContent = 'Открыть загрузки';
+      openStoreTopBtn.textContent = 'Загрузки';
+      footerHint.textContent = 'Если приложение не установлено, откроется страница загрузки без списания активации.';
+      downloadNote.style.display = 'none';
+    }
+
+    function getOrCreateLocalValue(key) {
+      let value = localStorage.getItem(key);
+      if (!value) {
+        value = `${Date.now()}-${Math.random().toString(16).slice(2)}${Math.random().toString(16).slice(2)}`;
+        localStorage.setItem(key, value);
+      }
+      return value;
+    }
+
+    function getClientFingerprintPayload() {
+      const nav = window.navigator || {};
+      const scr = window.screen || {};
+      const clientId = getOrCreateLocalValue('happ_client_id');
+
+      browserToken = localStorage.getItem('happ_browser_token') || browserToken || '';
+      if (!browserToken) {
+        browserToken = getOrCreateLocalValue('happ_browser_token');
+        localStorage.setItem('happ_browser_token', browserToken);
+      }
+
+      let pageSessionId = sessionStorage.getItem('happ_page_session_id');
+      if (!pageSessionId) {
+        pageSessionId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        sessionStorage.setItem('happ_page_session_id', pageSessionId);
+      }
+
+      return {
+        clientId,
+        browserToken,
+        pageSessionId,
+        platform: nav.userAgentData?.platform || nav.platform || '',
+        vendor: nav.vendor || '',
+        language: nav.language || '',
+        languages: Array.isArray(nav.languages) ? nav.languages : [],
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+        timezoneOffset: new Date().getTimezoneOffset(),
+        screen: `${scr.width || 0}x${scr.height || 0}@${window.devicePixelRatio || 1}`,
+        viewport: `${window.innerWidth || 0}x${window.innerHeight || 0}`,
+        colorDepth: scr.colorDepth || '',
+        pixelRatio: window.devicePixelRatio || 1,
+        touchPoints: nav.maxTouchPoints || 0,
+        hardwareConcurrency: nav.hardwareConcurrency || '',
+        deviceMemory: nav.deviceMemory || '',
+        pageUrl: location.href,
+        pagePath: location.pathname,
+        referrer: document.referrer || '',
+        deviceType: /Mobi|Android|iPhone|iPod/i.test(nav.userAgent || '')
+          ? 'mobile'
+          : (/iPad|Tablet/i.test(nav.userAgent || '') ? 'tablet' : 'desktop')
+      };
+    }
+
+    async function api(url, options = {}) {
+      const payload = options.body ? JSON.parse(options.body) : null;
+
+      const res = await fetch(url, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-happ-browser-token': browserToken || '',
+          ...(options.headers || {})
+        },
+        body: payload ? JSON.stringify(payload) : undefined
+      });
+
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (_) {
+        data = null;
+      }
+
+      if (data?.browserToken) {
+        browserToken = data.browserToken;
+        localStorage.setItem('happ_browser_token', browserToken);
+      }
+
+      if (!res.ok) {
+        throw Object.assign(new Error(data?.error || `HTTP ${res.status}`), {
+          status: res.status,
+          data
+        });
+      }
+
+      return data;
+    }
+
+    async function trackEvent(event, note = '') {
+      try {
+        await api(`/happ/api/redeem-track/${encodeURIComponent(token)}`, {
+          method: 'POST',
+          body: JSON.stringify({
+            ...getClientFingerprintPayload(),
+            event,
+            note
+          })
+        });
+      } catch (_) {}
+    }
+
+    function updateDeviceInfo(boundDevice) {
+      if (!boundDevice) {
+        deviceInfoCard.classList.add('hidden');
+        return;
+      }
+
+      deviceInfoCard.classList.remove('hidden');
+
+      let icon = '📱';
+      if (boundDevice.platform?.toLowerCase().includes('iphone')) icon = '📱';
+      else if (boundDevice.platform?.toLowerCase().includes('android')) icon = '📱';
+      else if (boundDevice.platform?.toLowerCase().includes('windows')) icon = '💻';
+      else if (boundDevice.platform?.toLowerCase().includes('mac')) icon = '💻';
+      deviceIcon.textContent = icon;
+
+      const osBrowser = [boundDevice.os, boundDevice.browser].filter(Boolean).join(' • ');
+      deviceOsBrowser.textContent = osBrowser || 'Неизвестно';
+
+      if (boundDevice.firstSeenAt) {
+        const date = new Date(boundDevice.firstSeenAt);
+        deviceDate.textContent = `Активировано: ${date.toLocaleString('ru-RU', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })}`;
+      } else {
+        deviceDate.textContent = 'Дата активации неизвестна';
+      }
+    }
+
+    async function checkDevice() {
+      try {
+        const payload = getClientFingerprintPayload();
+        const data = await api(`/happ/api/check-device/${encodeURIComponent(token)}`, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+
+        metaRemaining.textContent = String(data?.remaining ?? '—');
+
+        if (data.status === 'different-device') {
+          showNotice('error', data.message || 'Эта подписка уже активирована на другом устройстве');
+          if (data.boundDevice) {
+            updateDeviceInfo(data.boundDevice);
+            deviceWarning.classList.remove('hidden');
+            deviceBadge.classList.add('hidden');
+          }
+          addBtn.style.display = 'none';
+          return false;
+        } else if (data.status === 'same-device') {
+          showNotice('info', data.message || 'Это устройство уже активировало подписку');
+          if (data.boundDevice) {
+            updateDeviceInfo(data.boundDevice);
+            deviceBadge.classList.remove('hidden');
+            deviceWarning.classList.add('hidden');
+          }
+          addBtn.style.display = 'inline-flex';
+          return true;
+        } else {
+          addBtn.style.display = 'inline-flex';
+          deviceInfoCard.classList.add('hidden');
+          return true;
+        }
+      } catch (e) {
+        showNotice('error', e?.data?.error || 'Ошибка проверки устройства');
+        return false;
+      }
+    }
+
+    async function loadLinkInfo() {
+      const data = await api(`/happ/api/link/${encodeURIComponent(token)}`);
+
+      metaUser.textContent = data?.username || '—';
+      metaRemaining.textContent = String(data?.remaining ?? '—');
+      metaStatus.textContent = data?.status || '—';
+
+      currentOS = detectOS();
+      applyPlatformTexts(currentOS);
+
+      if (currentOS === 'iOS') {
+        currentStoreUrl = data?.appStoreUrl || '';
+      } else if (currentOS === 'Android') {
+        currentStoreUrl = data?.playStoreUrl || 'https://play.google.com/store/apps/details?id=com.happproxy&hl=ru';
+      } else if (currentOS === 'Windows') {
+        currentStoreUrl = WINDOWS_DOWNLOAD_URL;
+      } else if (currentOS === 'macOS') {
+        currentStoreUrl = MACOS_DOWNLOAD_URL;
+      } else if (currentOS === 'Linux') {
+        currentStoreUrl = LINUX_DOWNLOAD_URL;
+      } else {
+        currentStoreUrl = 'https://www.happ.su/main';
+      }
+
+      if (currentStoreUrl) {
+        storeBtn.style.display = 'inline-flex';
+        openStoreTopBtn.style.display = 'inline-flex';
+        storeBtn.onclick = () => { location.href = currentStoreUrl; };
+        openStoreTopBtn.onclick = () => { location.href = currentStoreUrl; };
+      } else {
+        storeBtn.style.display = 'none';
+        openStoreTopBtn.style.display = 'none';
+      }
+
+      if (data?.boundDevice) {
+        updateDeviceInfo(data.boundDevice);
+      }
+    }
+
+    async function runPreview() {
+      hideNotice();
+
+      const data = await api(`/happ/api/redeem-preview/${encodeURIComponent(token)}`, {
+        method: 'POST',
+        body: JSON.stringify(getClientFingerprintPayload())
+      });
+
+      previewData = data;
+      metaRemaining.textContent = String(data?.remaining ?? '—');
+
+      if (data?.boundDevice) {
+        updateDeviceInfo(data.boundDevice);
+      }
+    }
+
+    async function sendConfirmOnce() {
+      if (confirmSent) return;
+      
+      try {
+        const data = await api(`/happ/api/redeem-confirm/${encodeURIComponent(token)}`, {
+          method: 'POST',
+          body: JSON.stringify(getClientFingerprintPayload())
+        });
+
+        confirmSent = true;
+        metaRemaining.textContent = String(data?.remaining ?? '—');
+        metaStatus.textContent = data?.remaining === 0 ? 'used' : 'active';
+      } catch (error) {
+        if (error.status === 403) {
+          showNotice('error', error.data?.error || 'Ошибка активации');
+          if (error.data?.boundDevice) {
+            updateDeviceInfo(error.data.boundDevice);
+            deviceWarning.classList.remove('hidden');
+            deviceBadge.classList.add('hidden');
+          }
+        }
+        throw error;
+      }
+    }
+
+    function tryOpenAppWithFallback(appUrl, fallbackUrl) {
+      return new Promise((resolve) => {
+        let finished = false;
+        let hidden = false;
+        let confirmTimer = null;
+
+        const cleanup = () => {
+          document.removeEventListener('visibilitychange', onVisibilityChange);
+          window.removeEventListener('pagehide', onPageHide);
+          window.removeEventListener('blur', onBlur);
+          if (confirmTimer) clearTimeout(confirmTimer);
+        };
+
+        const done = (result) => {
+          if (finished) return;
+          finished = true;
+          cleanup();
+          resolve(result);
+        };
+
+        const onVisibilityChange = () => {
+          if (document.visibilityState === 'hidden') {
+            hidden = true;
+            if (currentOS === 'Windows' || currentOS === 'macOS' || currentOS === 'Linux') {
+              confirmTimer = setTimeout(() => {
+                sendConfirmOnce().catch(console.error);
+              }, 2000);
+            } else {
+              sendConfirmOnce().catch(console.error);
+            }
+            done({ opened: true });
+          }
+        };
+
+        const onPageHide = () => {
+          hidden = true;
+          sendConfirmOnce().catch(console.error);
+          done({ opened: true });
+        };
+
+        const onBlur = () => {
+          hidden = true;
+          if (currentOS === 'Windows' || currentOS === 'macOS' || currentOS === 'Linux') {
+            confirmTimer = setTimeout(() => {
+              sendConfirmOnce().catch(console.error);
+            }, 2000);
+          } else {
+            sendConfirmOnce().catch(console.error);
+          }
+        };
+
+        document.addEventListener('visibilitychange', onVisibilityChange);
+        window.addEventListener('pagehide', onPageHide);
+        window.addEventListener('blur', onBlur);
+
+        const timeout = (currentOS === 'Windows' || currentOS === 'macOS' || currentOS === 'Linux') ? 3000 : 1200;
+        
+        setTimeout(() => {
+          if (!hidden) {
+            done({ opened: false, fallbackUrl });
+          }
+        }, timeout);
+
+        window.location.href = appUrl;
+      });
+    }
+
+    async function confirmAndOpen() {
+      addBtn.disabled = true;
+      hideNotice();
+
+      try {
+        const canActivate = await checkDevice();
+        
+        if (!canActivate) {
+          addBtn.disabled = false;
+          return;
+        }
+
+        if (!previewData?.happLink) {
+          throw new Error('Нет ссылки для открытия HAPP');
+        }
+
+        await trackEvent('open-click', 'user-clicked-open');
+        showNotice('info', `Пробуем открыть HAPP... Платформа: ${currentOS}`);
+
+        const result = await tryOpenAppWithFallback(previewData.happLink, currentStoreUrl);
+
+        if (!result.opened) {
+          showNotice('warn', 'Клиент HAPP не найден. Открываем магазин, активация не списана.');
+          setTimeout(() => {
+            if (result.fallbackUrl) location.href = result.fallbackUrl;
+          }, 250);
+        }
+      } catch (e) {
+        console.error('Activation error:', e);
+        showNotice('error', e?.data?.error || e.message || 'Не удалось подтвердить добавление');
+      } finally {
+        addBtn.disabled = false;
+      }
+    }
+
+    addBtn.addEventListener('click', confirmAndOpen);
+    recheckBtn.addEventListener('click', checkDevice);
+
+    document.addEventListener('visibilitychange', async () => {
+      if (document.visibilityState === 'hidden') {
+        await trackEvent('app-open-attempt', 'visibility-hidden');
+      }
+    });
+
+    window.addEventListener('pagehide', async () => {
+      await trackEvent('app-open-attempt', 'pagehide');
+    });
+
+    (async () => {
+      try {
+        await trackEvent('page-open', 'initial-load');
+        await loadLinkInfo();
+        await runPreview();
+        await checkDevice();
+      } catch (e) {
+        showNotice('error', e?.data?.error || e.message || 'Ошибка загрузки страницы');
+      }
+    })();
+  </script>
+</body>
+</html>

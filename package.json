@@ -1,0 +1,16 @@
+{
+  "name": "happ-admin-links",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@kastov/cryptohapp": "^1.1.2",
+    "express": "^4.21.2",
+    "lowdb": "^7.0.1",
+    "qrcode": "^1.5.4",
+    "ua-parser-js": "^1.0.39"
+  }
+}

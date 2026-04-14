@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Добавить в HAPP</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #111827, #1e40af);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 520px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 28px 22px;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.25);
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 30px;
+    }
+
+    p {
+      color: rgba(255,255,255,0.88);
+      line-height: 1.5;
+    }
+
+    .btn {
+      display: block;
+      margin-top: 22px;
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: #22c55e;
+      color: #fff;
+      text-decoration: none;
+      font-size: 20px;
+      font-weight: 700;
+      box-shadow: 0 12px 30px rgba(34,197,94,0.35);
+    }
+
+    .warn {
+      margin-top: 18px;
+      padding: 14px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 14px;
+      font-size: 14px;
+    }
+
+    .raw {
+      margin-top: 18px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.22);
+      word-break: break-all;
+      text-align: left;
+      font-size: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Добавить профиль в HAPP</h1>
+    <p>Нажми кнопку ниже. Приложение HAPP откроется и импортирует подписку.</p>
+
+    <a id="openBtn" class="btn" href="#">Добавить в HAPP</a>
+
+    <div class="warn">
+      Если кнопка не открывает приложение, проверь, что HAPP установлен на iPhone.
+    </div>
+
+    <div id="rawLink" class="raw"></div>
+  </div>
+
+  <script>
+    const openBtn = document.getElementById('openBtn');
+    const rawLink = document.getElementById('rawLink');
+
+    function getHappLink() {
+      const hash = window.location.hash.startsWith('#')
+        ? window.location.hash.slice(1)
+        : window.location.hash;
+
+      if (!hash) return '';
+
+      try {
+        return decodeURIComponent(hash);
+      } catch {
+        return hash;
+      }
+    }
+
+    const happLink = getHappLink();
+
+    if (!happLink || !happLink.startsWith('happ://crypt')) {
+      openBtn.textContent = 'Некорректная ссылка';
+      openBtn.removeAttribute('href');
+      rawLink.style.display = 'block';
+      rawLink.textContent = 'В ссылке страницы нет валидного happ deeplink.';
+    } else {
+      openBtn.href = happLink;
+      rawLink.style.display = 'block';
+      rawLink.textContent = happLink;
+    }
+  </script>
+</body>
+</html>
+а 
